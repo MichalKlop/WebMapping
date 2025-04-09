@@ -11,9 +11,8 @@
     <!--    Include the reference to the Mapbox CSS here in between <head> tags    (Part I.2) -->
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css' rel='stylesheet' />
     
-
     <style>
-        /* Insert the additional CSS code here between the <style> tags  (Part I.4)   */
+      /* Insert the additional CSS code here between the <style> tags  (Part I.4)   */
       body { margin:0; padding:0; }
       #map { position:absolute; top:0; bottom:0; width:100%; }
       #title { z-index: 9999; 
@@ -22,6 +21,34 @@
         text-align: center 
       }
 
+      .mapboxgl-popup-content {
+        border: 1px solid black;
+      }
+
+      /* Legend styles */
+      #legend {
+        position: fixed;
+        bottom: 30px;
+        left: 10px;
+        background: white;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 5px;
+        z-index: 1;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin: 5px 0;
+      }
+
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        border: 1px solid black;
+      }
     </style>
   </head>
 
@@ -30,9 +57,27 @@
     <div id='map'></div>
     <!--  Insert the title div here (part V) -->
     <div id='title'>
-      <h1>My Map of Portland</h1>
+      <h1>My Map of Bridges Across the Willamette River in Portland</h1>
       <h2>By: Michal Klopotowski</h2>
-      
+    </div>
+
+    <div id="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #3B6FB6;"></div>
+        <p>Interstate</p>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #D35400;"></div>
+        <p>Highway</p>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #AAAAAA;"></div>
+        <p>Road</p>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #F1C40F;"></div>
+        <p>Transit</p>
+      </div>
     </div>
     
     <script>
@@ -43,40 +88,226 @@
         // Then initialize the map here (Part 2.2)
         var map = new mapboxgl.Map({
           container: 'map', // id of a div on your page, where the map will be inserted
-          style: 'mapbox://styles/mapbox/navigation-day-v1', // stylesheet location
-          center: [-122.6788, 45.5212], // starting position [lng, lat] eg. [-122.6788, 45.5212] Mckenzie: [-123.07819367464626, 44.0473277735542]
-          zoom: 11 // starting zoom 
+          style: 'mapbox://styles/mapbox/outdoors-v12', // stylesheet location
+          center: [-122.68171810142823, 45.5367131143166], // starting position [lng, lat] eg. [-122.6788, 45.5212]
+          zoom: 12 // starting zoom 
         });
+
         // Add popups for markers here. Yes, before the markers!  (part IV)
-        var popup = new mapboxgl.Popup({ offset: 25 })
-        .setHTML('Hello World. Welcome to Portland!');
+        var popup_fremont = new mapboxgl.Popup({
+          anchor: 'bottom-right'
+        })
+        .setHTML(`
+          <h3>Fremont Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/I-405.svg/1280px-I-405.svg.png" 
+              alt="I-405 Shield" 
+              style="width: 50px; height: auto;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/FremontBridgePano.jpg/1920px-FremontBridgePano.jpg"
+              alt="Fremont Bridge"
+              style="width: 200px; height: auto;">
+              <p>By <a href="//commons.wikimedia.org/wiki/User:Cacophony" title="User:Cacophony">Cacophony</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by/3.0" title="Creative Commons Attribution 3.0">CC BY 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=2963883">Link</a></p>
+          </div>
+        `);
+
+        var popup_broadway = new mapboxgl.Popup({
+          anchor: 'top-right'
+        })
+        .setHTML(`
+          <h3>Broadway Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/BroadwayBridge.jpg" 
+              alt="Image of Broadway Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By Original uploader was <a href="https://en.wikipedia.org/wiki/User:Cacophony" class="extiw" title="en:User:Cacophony">Cacophony</a> at <a class="external text" href="https://en.wikipedia.org">en.wikipedia</a> - Transferred from <a class="external text" href="https://en.wikipedia.org">en.wikipedia</a>, <a href="http://creativecommons.org/licenses/by-sa/3.0/" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=3909536">Link</a></p>
+          </div>
+        `);
+
+        var popup_steel = new mapboxgl.Popup({
+          anchor: 'bottom-left'
+        })
+        .setHTML(`
+          <h3>Steel Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/OR_99W.svg/1280px-OR_99W.svg.png"
+              alt="OR 99W Shield" 
+              style="width: 50px; height: auto;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/SteelBridgePano1.jpg/1920px-SteelBridgePano1.jpg" 
+              alt="Image of Steel Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By <a href="//commons.wikimedia.org/wiki/User:Cacophony" title="User:Cacophony">Cacophony</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by/3.0" title="Creative Commons Attribution 3.0">CC BY 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=3576136">Link</a></p>
+          </div>
+        `);
+
+        var popup_burnside = new mapboxgl.Popup({
+          anchor: 'left'
+        })
+        .setHTML(`
+          <h3>Burnside Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/BroadwayBridge.jpg" 
+              alt="Image of Burnside Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By Taken by <a href="//commons.wikimedia.org/wiki/User:Cacophony" title="User:Cacophony">User:Cacophony</a>. - Taken by <a href="//commons.wikimedia.org/wiki/User:Cacophony" title="User:Cacophony">User:Cacophony</a>., <a href="https://creativecommons.org/licenses/by-sa/2.5" title="Creative Commons Attribution-Share Alike 2.5">CC BY-SA 2.5</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=493154">Link</a></p>
+          </div>
+        `);
+
+        var popup_morrison = new mapboxgl.Popup({
+          anchor: 'right'
+        })
+        .setHTML(`
+          <h3>Morrison Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Morrison_Bridge.jpg/1280px-Morrison_Bridge.jpg" 
+              alt="Image of Morrison Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By <a href="//commons.wikimedia.org/w/index.php?title=User:Raymonst&amp;action=edit&amp;redlink=1" class="new" title="User:Raymonst (page does not exist)">Raymonst</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=28736518">Link</a></p>
+          </div>
+        `);
+
+        var popup_hawthorne = new mapboxgl.Popup({
+          anchor: 'right'
+        })
+        .setHTML(`
+          <h3>Hawthorne Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Hawthorne_Bridge_%28Portland%2C_Oregon%29_from_southwest%2C_2012.jpg/1280px-Hawthorne_Bridge_%28Portland%2C_Oregon%29_from_southwest%2C_2012.jpg" 
+              alt="Image of Hawthorne Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By <a href="//commons.wikimedia.org/wiki/User:Steve_Morgan" title="User:Steve Morgan">Steve Morgan</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=27492129">Link</a></p>
+          </div>
+        `);
+
+        var popup_marquam = new mapboxgl.Popup({
+          anchor: 'right'
+        })
+        .setHTML(`
+          <h3>Marquam Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/I-5.svg/1024px-I-5.svg.png" 
+              alt="I-5 Shield" 
+              style="width: 50px; height: auto;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/MarquamBridge.jpg/1920px-MarquamBridge.jpg"
+              alt="Image of Marquam Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By Taken by <a href="//commons.wikimedia.org/wiki/User:Cacophony" title="User:Cacophony">User:Cacophony</a> - Taken by <a href="//commons.wikimedia.org/wiki/User:Cacophony" title="User:Cacophony">User:Cacophony</a>, <a href="https://creativecommons.org/licenses/by-sa/2.5" title="Creative Commons Attribution-Share Alike 2.5">CC BY-SA 2.5</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=550861">Link</a></p>
+          </div>
+        `);
+
+        var popup_tillikum = new mapboxgl.Popup({
+          anchor: 'bottom-right'
+        })
+        .setHTML(`
+          <h3>Tillikum Crossing Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Tilikum_Crossing_from_Ross_Island_Bridge_with_MAX.jpg/1920px-Tilikum_Crossing_from_Ross_Island_Bridge_with_MAX.jpg" 
+              alt="Image of Tillikum Crossing Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By <a href="//commons.wikimedia.org/wiki/User:Steve_Morgan" title="User:Steve Morgan">Steve Morgan</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=49899948">Link</a></p>
+          </div>
+        `);
+
+        var popup_ross = new mapboxgl.Popup({
+          anchor: 'left'
+        })
+        .setHTML(`
+          <h3>Ross Island Bridge</h3>
+          <div style="text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/US_26.svg/1024px-US_26.svg.png" 
+              alt="US26 Shield" 
+              style="width: 50px; height: auto;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Ross_Island_Bridge_from_SE%2C_from_Springwater_Corridor_Trail_%282019%29.jpg/1280px-Ross_Island_Bridge_from_SE%2C_from_Springwater_Corridor_Trail_%282019%29.jpg"
+              alt="Image of Ross Island Bridge" 
+              style="width: 200px; height: auto;">
+            <p>By <a href="//commons.wikimedia.org/wiki/User:Steve_Morgan" title="User:Steve Morgan">Steve Morgan</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=79681893">Link</a></p>
+          </div>
+        `);
+
         // Add any other variables such as markers here (part III)
-        var marker = new mapboxgl.Marker({color:'red'})
-        .setLngLat([-122.6788, 45.5212]) // starting position [lng, lat]
-        .setPopup(popup) //add the popup with the variable name 'popup' to the marker 
-        .addTo(map);
+        const markers = [];
 
-        var marker2 = new mapboxgl.Marker({color:'pink'})
-        .setLngLat([-122.673308, 45.522675]) // starting position [lng, lat] 
-        .addTo(map);
+        function createMarker(coords, popup, type) {
+          const colors = {
+            'interstate': '#3B6FB6',
+            'highway': '#D35400',
+            'road': '#AAAAAA',
+            'transit': '#F1C40F'
+          };
+            
+          const marker = new mapboxgl.Marker({color: colors[type]})
+          .setLngLat(coords)
+          .setPopup(popup)
+          .addTo(map);
+          
+          marker.type = type;
+          markers.push(marker);
 
-      var popup_layer = new mapboxgl.Popup({
-        closeOnClick: true, anchor: 'top-right'
-      })
-      .setLngLat([-122.64, 45.5])
-      .setHTML('<h1>Hi Portland!</h1>')
-      .addTo(map);
+          return marker;
+        }
 
-      var popup_layer_voodoo = new mapboxgl.Popup({
-       closeOnClick: true, anchor: 'top-left'
-      })
-      .setLngLat([-122.673308, 45.522675])
-      .setHTML('<a href="https://www.voodoodoughnut.com">voodoo donuts</a>')
-      .addTo(map);
+        const fremont = createMarker(
+          [-122.68266902351805, 45.538207940788816],
+          popup_fremont,
+          'interstate'
+        );
+
+        const broadway = createMarker(
+          [-122.67391138885604, 45.5320247225551],
+          popup_broadway,
+          'road'
+        );
+
+        const burnside = createMarker(
+          [-122.66768922235407, 45.523059671148495],
+          popup_burnside,
+          'road'
+        );
+
+        const steel = createMarker(
+          [-122.66917872281635, 45.52766204688994],
+          popup_steel,
+          'highway'
+        );
+
+        const morrison = createMarker(
+          [-122.66984020086011, 45.517815397231146],
+          popup_morrison,
+          'road'
+        );
+
+        const hawthorne = createMarker(
+          [-122.67093383173948, 45.51322708735291],
+          popup_hawthorne,
+          'road'
+        );
+
+        const tillikum = createMarker(
+          [-122.6670619258808, 45.504872954391224],
+          popup_tillikum,
+          'transit'
+        );
+
+        const marquam = createMarker(
+          [-122.66917454980548, 45.50790266235107],
+          popup_marquam,
+          'interstate'
+        );
+
+        const ross = createMarker(
+          [-122.66490964973923, 45.50119361520104],
+          popup_ross,
+          'interstate'
+        );
+
         // Add optional advanced "On load" function here
+        map.on('load', function() {
+          markers.forEach(marker => {
+            if (marker.type === 'interstate' || marker.type === 'highway') {
+              marker.togglePopup();
+            }
+          });
+        });
       
     </script>
-
   </body>
-
 </html>
