@@ -1,0 +1,25 @@
+html {
+    font-family: Georgia, Times, serif;
+    font-size: 12px;
+    line-height: 32px;
+}
+
+body {
+    text-align: center;
+}
+
+a:hover {
+    color: orange;
+}
+
+p {
+    background-color: red;
+    padding: 20px;
+    width: 320px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+#bar {
+    background-color: aqua;
+}

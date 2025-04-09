@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <title>University of Oregon Mapping</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <!--    Include the reference to the Mapbox JavaScript here in the <head> of the page    -->
+      <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.js'></script>
+    <!--    Include the reference to the Mapbox CSS here in the <head> of the page    -->
+      <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        /* Insert the CSS code here between the <style> tags */
+        body { margin:0; padding:0; }
+        #map { position:absolute; height:100%; width:100%; }
+
+    </style>
+  </head>
+
+  <body>
+      <div id='map'></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoiam9tZXJzb24iLCJhIjoiY2ttd2RkZm93MGU0NTJva3ZrYnNjdm96NyJ9.UInewYPFhBP6M5yGKDpSGQ';//  Put your access token between the single quotes.
+        
+        var myMap = new mapboxgl.Map({
+            container: 'map', // id of a div on your page, where the map will be inserted
+            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            center: [-122.6788, 45.5212], // starting position [lng, lat]
+            zoom: 11 // starting zoom 
+        });
+    </script>
+  </body>
+
+</html>
