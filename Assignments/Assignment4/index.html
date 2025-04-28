@@ -10,6 +10,12 @@
   <!-- JS and CSS for the swipe plugin -->
   <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.js'></script>
   <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.css' type='text/css' />
+
+  <!-- Link to the Bootstrap library for the info panel and icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" defer></script>
+
   <style>
     body { margin:0; padding:0;overflow: hidden;}
     body * {
@@ -26,12 +32,137 @@
       bottom: 0;
       width: 100%;
     }
+
+    /* Main Title */
+    .map-title {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      width: fit-content;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+      z-index: 5;
+    }
+
+    /* Main Legend Container */
+    .LegendContainer {
+      position: absolute;
+      bottom: 35px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      color: white;
+      font-family: Arial, sans-serif;
+      z-index: 4;
+    }
+
+    /* "Legend" title for the legend */
+    #legend-title {
+      text-align: center;
+    }
+
+    /* Subtitle for the legend */
+    #legend-subtitle {
+      font-size: 12px;
+      text-align: center;
+      color: rgb(200,200,200);
+    }
+
+    /* The color blocks for each choropleth group */
+    .legend-group {
+      display: inline-block;
+      width: 20px;
+      height: 10px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* Styling for info container including the button and description panel */
+    .info-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 5;
+    }
+
+    /* Display and positioning for the info button */
+    .infoButton {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Positioning for the description panel */
+    .descriptionPanel {
+      position: relative;
+      margin-top: 5px;
+      width: 100%;
+      padding: 0;
+      text-align: left;
+      z-index: 4;
+    }
+
+    /* Make the background of the description panel slightly transparent */
+    .card-body {
+      background: rgba(255,255,255,0.8);
+    }
+
   </style>
 </head>
 <body>
+  <!-- Main Title -->
+  <div class="map-title">Portland Homeowners vs. Renters Comparison</div>
+
+  <!-- Container for map info -->
+  <div class="info-container">
+    <!-- Info Button -->
+    <button class="btn btn-primary infoButton collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#descriptionPanel" aria-expanded="false" aria-controls="descriptionPanel">
+      <i class="bi bi-info-square-fill"></i> About This Map
+    </button>
+    <!-- Description Panel -->
+    <div class="collapse descriptionPanel" id="descriptionPanel">
+      <div class="card card-body">
+        <p>This map shows the percentage of people in each census tract who are either homeowners or renters in Portland, Oregon, based on 2017 data.</p>
+        <p>The left side shows the percentage of people who are homeowners in each tract, while the right side shows the percentage who are renters.</p>
+        <p>Use the swipe bar in the middle to compare the two patterns. Hover over a tract to view the exact percentage.</p>
+        <p style="margin-bottom: 0">Data source: US Census Bureau, 2017</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison container for comparing owners to renters -->
   <div id="comparison-container">
     <div id='owners' class='map'></div>  <!-- div for owners map div -->
     <div id='renters' class='map'></div> <!--  div for renters map div -->
+  </div>
+
+  <!-- Legend -->
+  <div class="LegendContainer">
+    <!-- Legend Header -->
+    <div id="legend-title"><strong>Housing Occupancy (%)</strong></div>
+    <div id="legend-subtitle">
+      Left map: % Owner-Occupied<br>
+      Right map: % Renter-Occupied
+    </div>
+    <!-- Ordered groups corresponding to the different choropleth colors -->
+    <div><span class="legend-group" style="background: hsl(225, 100%, 97%);"></span> 0–17%</div>
+    <div><span class="legend-group" style="background: hsl(203, 47%, 82%);"></span> 17–22%</div>
+    <div><span class="legend-group" style="background: hsl(202, 57%, 63%);"></span> 22–27%</div>
+    <div><span class="legend-group" style="background: #3182bd;"></span> 27–32%</div>
+    <div><span class="legend-group" style="background: hsl(210, 90%, 32%);"></span> 32%+</div>
   </div>
 
   <script>
