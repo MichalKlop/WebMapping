@@ -248,7 +248,6 @@
             map.on('click', layerID, function (e) {
               var coordinates = e.features[0].geometry.coordinates.slice();
               var type = e.features[0].properties.icon;
-              // var description = "This is a map point <br> Type: " + e.features[0].properties.icon;
               var description = "Point of Interest<br> Type: " + type.charAt(0).toUpperCase() + type.slice(1);
 
               new mapboxgl.Popup()
