@@ -1,0 +1,88 @@
+<!-- A Versatile Layout for Full-screen Maps by Andy Cochran
+Andy Cochran 
+From https://medium.com/nyc-planning-digital/a-versatile-layout-for-full-screen-maps-229cec508b22 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Washington D.C Points of Interest</title>
+
+    <!-- JavaScript Libraries-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.js"></script>
+
+    <!-- CSS Links -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/css/foundation.min.css" rel="stylesheet" />
+    <link href="VersitileLayout.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="site-header">
+      <strong class="site-title">Washington D.C Points of Interest</strong>
+    </div>
+
+    <div class="site-main grid-x has-content-open">
+      <div class="search-container cell medium-3 large-2">
+        <input type="text" placeholder="Search..." class="search" />
+        <ul class="search-results no-bullet">
+          <li>Search Result 1</li>
+          <li>Search Result 2</li>
+          <li>Search Result 3</li>
+        </ul>
+      </div>
+
+      <div class="map-container cell medium-auto large-order-2">
+        <!--  ADD iframe here, inside the versitle layout's map container (VI.2.)   -->
+        <iframe id="map" src="filter-markers.html" title="Map"></iframe>
+      </div>
+
+      <!--  Sidebar panel  -->
+      <div class="sidebar cell medium-3 large-2 large-order-1 show-for-medium">
+        <h5>Map Tips</h5>
+        <ul>
+          <li>Use the checkboxes in the map legend (top-right) to toggle categories</li>
+          <li>Click icons on the map to learn about each point</li>
+          <li>Pan or zoom to explore the area</li>
+        </ul>
+
+        <hr />
+        <p><strong>Want to learn more?</strong></p>
+        <p><a class="content-link button small expanded" href="#">Open the About Panel</a></p>
+      </div>
+
+      <div class="content-close-button-container">
+        <a href="#" class="content-close-button">×</a>
+      </div>
+
+      <!--  Content panel  -->
+      <div class="content cell large-5 large-order-3">
+        <h2>About This Map</h2>
+        <p>This interactive map highlights a variety of points of interest across Washington D.C., including theaters, bars, bicycle rentals, and music venues. Users can explore the city by panning and zooming, and toggle categories on and off using the checkbox legend in the top-right corner of the map.</p>
+        <p>Each icon on the map represents a specific type of location. Clicking on an icon opens a popup with information about that place’s category. Use the checkbox legend in the top-right corner of the map to show or hide different point categories.</p>
+        <p>The point data is loaded in GeoJSON format and styled using Mapbox GL JS, a JavaScript library for interactive web maps. This versatile layout was originally created by Andy Cochran and allows for reactive resizing of page elements depending on screen size.</p>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function() {
+        $('.content-close-button').click(function() {
+          $('.content-close-button').hide();
+          $('.content').hide();
+          $('.site-main').removeClass('has-content-open')
+
+          // When the map is resized programmatically, window resize must be triggered so that the map renders in the newly allotted space.
+          window.dispatchEvent(new Event('resize'));
+
+        });
+
+        $('.content-link').click(function() {
+          $('.content-close-button').show();
+          $('.content').show();
+          $('.site-main').addClass('has-content-open')
+          window.dispatchEvent(new Event('resize'));
+        });
+
+      });
+    </script>
+  </body>
+</html>
