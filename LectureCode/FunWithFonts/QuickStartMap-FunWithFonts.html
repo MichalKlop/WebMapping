@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <title>Fun font map!</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <!--    Include the reference to the Mapbox JavaScript here in the <head> of the page    -->
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.1/mapbox-gl.js'></script>
+    <!--    Include the reference to the Mapbox CSS here in the <head> of the page    -->
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.1/mapbox-gl.css' rel='stylesheet' />
+
+    <!--   Link to Google font-->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css?family=Liu+Jian+Mao+Cao&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+      
+    <!--   Link to Font Awesome-->
+    <script src="https://kit.fontawesome.com/eac4affb11.js" crossorigin="anonymous"></script>
+
+    <style>
+        /* Insert the CSS code here between the <style> tags */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+          /* set font in poopups, by using the selctor for the existing mapbox class "mapboxgl-popup"*/
+        /* .mapboxgl-popup {
+            font-family: 'Liu Jian Mao Cao', cursive;
+            font-size: 30pt!important;
+             
+        } */
+
+        .mapboxgl-popup .fancy-text {
+            font-family: 'UnifrakturCook', cursive;
+            font-size: 12pt;
+        }
+       
+
+        .giant {
+            font-size: 300%;
+        } 
+    </style>
+</head>
+
+<body>
+    <!--      Hello World. Welcome to Portland!<br><i class="fas fa-university"></i>-->
+    <!--      Insert the map div here in the <body> of the page -->
+    <div id='map'></div>
+
+    <script>
+        // Insert the JavaScript within the <script> tags, within the body   
+        // Start with the Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoiam9tZXJzb24iLCJhIjoiY2o1bXE2bHlyMnJhZDMzbnpyMnhlODdpcSJ9.QJMJ_cTFCY050aZfSn1umQ';
+
+        // Then initialize the map
+        var map = new mapboxgl.Map({
+            container: 'map', // id of a div on your page, where the map will be inserted
+            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            center: [-122.6788, 45.5212], // starting position [lng, lat] eg. [-122.6788, 45.5212]
+            zoom: 11 // starting zoom 
+        });
+
+        // Add any other variables (such as markers)
+
+        /***  Google Font Example ***/
+        var popup = new mapboxgl.Popup({
+                offset: 25
+            })
+            // .setHTML('voodoo donuts')
+            // .setHTML('<span class="fancy-text"> voodoo donuts</span>')
+            .setHTML('<a class="fancy-text" href="https://www.w3schools.com/html/">w3schools.com</a>')
+            // .setHTML('<a href="https://www.w3schools.com/html/">voodoo donuts</a><br><br><i class="fas fa-university"></i>')
+
+        var marker = new mapboxgl.Marker({
+                color: 'red'
+            })
+            .setLngLat([-122.6788, 45.5212]) // starting position [lng, lat] 
+            .setPopup(popup) //add the popup to the marker 
+            .addTo(map);
+
+      /***  Font Awesome Example ***/
+    //    var popup2 = new mapboxgl.Popup({
+    //            offset: 25
+    //        })
+    //        .setHTML('<i class="fas fa-university"></i>');
+    //    var marker2 = new mapboxgl.Marker({
+    //            color: 'purple'
+    //        })
+    //        .setLngLat([-122.69, 45.55]) // starting position [lng, lat] 
+    //        .setPopup(popup2) //add the popup to the marker 
+    //        .addTo(map);
+
+
+        /***  HTML Entity  ***/
+       var popup3 = new mapboxgl.Popup({
+               offset: 25
+           })
+           .setHTML('<span class="giant">&spades;</span><br> '); // copyright entity
+       
+       var marker3 = new mapboxgl.Marker({
+               color: 'blue'
+           })
+           .setLngLat([-122.62, 45.55]) // starting position [lng, lat] 
+           .setPopup(popup3) //add the popup to the marker 
+           .addTo(map);
+    </script>
+
+</body></html>
