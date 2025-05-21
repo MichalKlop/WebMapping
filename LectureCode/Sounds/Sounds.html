@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapbox Audio Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    #playButton {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+<button id="playButton">Play Background Music</button>
+
+<audio id="mapAudio" src="audio/APM_Adobe_Going Home_v3.wav" preload="auto"></audio>
+
+<script>
+  // Mapbox token
+   mapboxgl.accessToken = 'pk.eyJ1Ijoiam9tZXJzb24iLCJhIjoiY2ttd2RkZm93MGU0NTJva3ZrYnNjdm96NyJ9.UInewYPFhBP6M5yGKDpSGQ';//  Put your access token between the single quotes.
+        
+  // Initialize map
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [-0.1276, 51.5074], // Example: London
+    zoom: 12
+  });
+
+  // Play audio on button click (required for autoplay policies)
+  document.getElementById('playButton').addEventListener('click', () => {
+    const audio = document.getElementById('mapAudio');
+    audio.play();
+  });
+
+  // Optional: try to play on map load (may fail if not user-triggered)
+  map.on('load', () => {
+    const audio = document.getElementById('mapAudio');
+    audio.play().catch(err => {
+      console.log('Autoplay failed:', err);
+    });
+  });
+</script>
+
+</body>
+</html>
