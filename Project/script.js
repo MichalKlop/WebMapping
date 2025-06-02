@@ -1,16 +1,29 @@
 // [Config]
-// The following values can be changed to control rotation speed:
-const secondsPerRevolution = 240; // Complete a revolution every two minutes
-const maxSpinZoom = 5; // Above this zoom level, do not rotate
-const slowSpinZoom = 3; // Rotate at intermediate speeds between zoom levels 3 and 5
-
-let userInteracting = false; // User interaction flag
-let spinEnabled = true; // Spin enabled flag
-
+// Map settings
 const defaultZoom = 2; // Default zoom level
 const defaultPitch = 0; // Default pitch level
 const defaultBearing = 0; // Default bearing level
 const maxMarkerZoom = 8.5; // Maximum zoom level for marker visibility
+const maxZoom = 18; // Maximum zoom level
+
+// Spin settings
+const secondsPerRevolution = 240; // Complete a revolution every two minutes
+const maxSpinZoom = 5; // Above this zoom level, do not rotate
+const slowSpinZoom = 3; // Rotate at intermediate speeds between zoom levels 3 and 5
+
+// State variables/flags
+let userInteracting = false; // User interaction flag
+let spinEnabled = true; // Spin enabled flag
+
+// Location data storage
+let trackLocations = {}; // Track locations
+let markers = []; // Array to store all markers
+let popups = [];  // Array to store all popups
+const circuits = [];  // Array to store all circuits
+
+// elements
+const resetZoom = document.getElementById('reset-zoom');
+const spinControl = document.getElementById('spin-control');
 
 
 // [Mapbox initialization]
@@ -20,165 +33,65 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/michal-k/cmazx0h7z009101sw9nxv7re9',
   projection: 'globe',
-  zoom: 2,
-  maxZoom: 18,
-  minZoom: 2,
+  zoom: defaultZoom,
+  maxZoom: maxZoom,
+  minZoom: defaultZoom,
   center: [30, 15]
 });
 
+// main
+map.on('load', () => {
+  loadMapData();
+  spinGlobe();
+  updateResetZoomVisibility();
+  updateSpinControlVisibility();
+});
+
+// [Map Styling] 
+map.on('style.load', () => {
+  // Fog/atmosphere settings (default from mapbox docs)
+  map.setFog({
+  color: 'rgb(186, 210, 235)', // Lower atmosphere
+  'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
+  'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
+  'space-color': 'rgb(11, 11, 25)', // Background color
+  'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
+  });
+
+  // Add arrow image to map (used in circuit view)
+  // ".svg is not supported when loading images into a style at runtime using map.loadImage()" - mapbox docs
+  // converted the svg to base64 which works as the src for the image
+  const arrowDataUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMSIgY2xhc3M9ImJpIGJpLWNhcmV0LXJpZ2h0LWZpbGwiIHZpZXdCb3g9IjAgMCAxNiAxNiI+CiAgPHBhdGggZD0ibTEyLjE0IDguNzUzLTUuNDgyIDQuNzk2Yy0uNjQ2LjU2Ni0xLjY1OC4xMDYtMS42NTgtLjc1M1YzLjIwNGExIDEgMCAwIDEgMS42NTktLjc1M2w1LjQ4IDQuNzk2YTEgMSAwIDAgMSAwIDEuNTA2eiIvPgo8L3N2Zz4K';
+  const img = new Image();
+  img.src = arrowDataUrl;
+  img.onload = () => {
+    if (!map.hasImage('arrow-right')) {
+      map.addImage('arrow-right', img);
+    }
+  };
+});
+
+
+// [Helper functions]
+// Check if any popup is open
 function isAnyPopupOpen() {
   return document.querySelector('.mapboxgl-popup') !== null;
 }
 
-// [Track markers and locations]
+// Show track on map
 function showTrack(country) {
-    const track = trackLocations[country];
-    if (track) {
-      map.flyTo({ center: [track.lon, track.lat], zoom: track.zoom });
-    }
+  const track = trackLocations[country];
+  if (track) {
+    map.flyTo({ center: [track.lon, track.lat], zoom: track.zoom });
   }
+}
 
-let trackLocations = {}; // Track locations
-let markers = []; // Array to store all markers
-let popups = [];  // Array to store all popups
-
-fetch('data/championships/f1-locations-2025.json')
-  .then(response => response.json())
-  .then(data => {
-    trackLocations = data.reduce((acc, item) => {
-      acc[item.location] = item;
-      return acc;
-    }, {});
-
-    console.debug("Track Locations loaded:", trackLocations);
-
-    // Create markers
-    for (const country in trackLocations) {
-      const { lon, lat, name, id } = trackLocations[country];
-      console.debug("Creating marker for:", country);
-      const el = document.createElement('div');
-      el.className = 'marker';
-      const popup = new mapboxgl.Popup().setHTML(`
-        <div class="titillium-web-bold">${country} GP</div>
-        <div class="titillium-web-regular">${name}</div>
-        <button class="zoom-to-track">Zoom to Track</button>
-      `);
-
-      // Load circuit GeoJSON if available
-      if (id) {
-        fetch(`data/circuits/${id}.geojson`)
-          .then(response => response.json())
-          .then(circuitData => {
-            // Add source for this circuit
-            const sourceId = `circuit-${id}`;
-            map.addSource(sourceId, {
-              type: 'geojson',
-              data: circuitData,
-              lineMetrics: true
-            });
-
-            // Add layer for this circuit
-            map.addLayer({
-              id: sourceId,
-              type: 'line',
-              source: sourceId,
-              layout: {
-                visibility: 'none' // Initially hidden
-              },
-              paint: {
-                'line-color': '#FF1E00',
-                'line-width': 3,
-                'line-opacity': 0.95,
-                'line-dasharray': [1, 0.5],
-                'line-gradient': [
-                  "interpolate",
-                  ["linear"],
-                  ["line-progress"],
-                  0, "#FF1E00",     // F1 Red
-                  0.3, "#FF4D4D",   // Lighter Red
-                  0.6, "#FF8080",   // Even Lighter Red
-                  0.8, "#FFB3B3",   // Very Light Red
-                  1, "#FFFFFF"      // White
-                ]
-              }
-            });
-
-            // Add directional arrows layer
-            map.addLayer({
-              id: `${sourceId}-arrows`,
-              type: 'symbol',
-              source: sourceId,
-              layout: {
-                visibility: 'none', // Initially hidden
-                'symbol-placement': 'line',
-                'symbol-spacing': 10000, // Space between arrows in pixels
-                'icon-image': 'arrow-right', // We'll need to add this icon
-                'icon-size': 1.5,
-                'icon-allow-overlap': false,
-                'icon-ignore-placement': true
-              }
-            });
-          })
-          .catch(error => console.debug(`Circuit ${id} not found or error loading:`, error));
-      }
-
-      popup.on('open', () => {
-        userInteracting = true;
-        if (spinEnabled) {
-          map.stop(); // Stop any ongoing spin
-        }
-        spinControl.classList.add('disabled');
-        const button = document.querySelector('.zoom-to-track');
-        if (button) {
-          button.blur(); // Prevent button from staying focused
-          button.addEventListener('click', () => {
-            showTrack(country);
-            map.once('moveend', () => popup.remove());
-          });
-        }
-      });
-
-      popup.on('close', () => {
-        userInteracting = false;
-        spinControl.classList.remove('disabled');
-        if (spinEnabled) {
-          spinGlobe(); // Resume spin
-          updateSpinControl(); // Update button state immediately
-          if (isAnyPopupOpen()) {
-            popups.forEach(popup => popup.remove());
-          }
-        } 
-      });
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([lon, lat])
-        .setPopup(popup)
-        .addTo(map);
-      markers.push(marker); // Store marker reference
-      popups.push(popup);
-    }
-  })
-  .catch(error => console.error('Error loading track locations:', error));
-
+// Update visibility of markers and circuits in detailed zoom levels
+function updateDetailedView() {
+  const currentZoom = map.getZoom();
+  const isHidden = currentZoom >= maxMarkerZoom;
   
-// [Map styling] 
-// fog/atmosphere
-map.on('style.load', () => {
-    map.setFog({
-    color: 'rgb(186, 210, 235)', // Lower atmosphere
-    'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
-    'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
-    'space-color': 'rgb(11, 11, 25)', // Background color
-    'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
-    });
-});
-
-// Marker visibility
-function updateMarkersVisibility() {
-  const zoom = map.getZoom();
-  const isHidden = zoom >= maxMarkerZoom;
-  
-  // Update markers
+  // Update markers visibility
   markers.forEach(marker => {
     const el = marker.getElement();
     if (isHidden) {
@@ -188,133 +101,312 @@ function updateMarkersVisibility() {
     }
   });
 
-  // Update circuit layers
+  // Update circuit visibility
   for (const country in trackLocations) {
-    const { id } = trackLocations[country];
-    if (id) {
-      const layerId = `circuit-${id}`;
-      if (map.getLayer(layerId)) {
-        map.setLayoutProperty(
-          layerId,
-          'visibility',
-          isHidden ? 'visible' : 'none'
-        );
-        // Update arrows layer visibility
-        map.setLayoutProperty(
-          `${layerId}-arrows`,
-          'visibility',
-          isHidden ? 'visible' : 'none'
-        );
-      }
-    }
+    // For each country, get the layer id of the circuit (circuit-id)
+    const layerId = `circuit-${trackLocations[country].id}`;
+    const layerIdArrows = layerId + '-arrows';
+
+    // Update circuit view visibility
+    map.setLayoutProperty(
+      layerId,
+      'visibility',
+      isHidden ? 'visible' : 'none'  // if isHidden==True, make visible, else hide
+    );
+    // Update circuit directional arrows visibility
+    map.setLayoutProperty(
+      layerIdArrows,
+      'visibility',
+      isHidden ? 'visible' : 'none'  // if isHidden==True, make visible, else hide
+    );
   }
 }
-
 
 // Spin globe
 function spinGlobe() {
-  const zoom = map.getZoom();
-  if (!spinEnabled || userInteracting || isAnyPopupOpen() || zoom >= maxSpinZoom) return;
+  const currentZoom = map.getZoom();
+  // If spin disabled, user interacting, popup open, or zoom too high, dont spin
+  if (!spinEnabled || userInteracting || isAnyPopupOpen() || currentZoom >= maxSpinZoom) return;
 
+  // Calculate distance per second based on zoom level
   let distancePerSecond = 360 / secondsPerRevolution;
-  if (zoom > slowSpinZoom) {
-    distancePerSecond *= (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+  // If zoom is greater than slowSpinZoom, increase distance per second
+  if (currentZoom > slowSpinZoom) {
+    distancePerSecond *= (maxSpinZoom - currentZoom) / (maxSpinZoom - slowSpinZoom);
   }
 
+  // Get current center of map
   const center = map.getCenter();
+  // Subtract distance per second from longitude
   center.lng -= distancePerSecond;
-  map.easeTo({ center, duration: 1000, easing: (n) => n, essential: true });
+  // Spin globe by easing to the new center
+  map.easeTo({
+    center: center,
+    duration: 1000,
+    essential: true, // forces the animation even when reduced motion is enabled
+    easing(t) {
+      return t;
+    } 
+  });
 }
-spinGlobe();
 
+// create popup element and add handlers
+function createPopup(country, name) {
+  // Create popup element
+  const popup = new mapboxgl.Popup().setHTML(`
+    <div class="header">${country} GP</div>
+    <div class="body">${name}</div>
+    <button class="zoom-to-track">Zoom to Track</button>
+  `);
+
+  // Add popup handlers (open, close)
+  popup.on('open', () => {
+    userInteracting = true;  // User is interacting with the popup
+    if (spinEnabled) {  // if spin is enabled, stop spinning
+      map.stop();
+    }
+    spinControl.classList.add('disabled');  // disable spin control
+
+    const button = popup.getElement().querySelector('.zoom-to-track');  // grab zoom to track button
+    button.blur();  // if pressed previously, "blurring" removes focus/highlighting so spacebar can function correctly
+    button.addEventListener('click', () => {  // on click of button, remove popup and zoom to track
+      popup.remove();
+      showTrack(country);
+    });
+  });
+
+  popup.on('close', () => {
+    userInteracting = false;  // User stopped interacting with the popup
+    spinControl.classList.remove('disabled');  // make spin control interactable again
+    if (spinEnabled) {  // if spin is enabled, resume spinning
+      spinGlobe();
+      updateSpinControl();
+    }
+  });
+
+  // add popup to popups array and return it
+  popups.push(popup); 
+  return popup;
+}
+
+// create marker and attach popup to it then add to map
+function createPOI(country, name, lon, lat) {
+  // Create marker element
+  const mark = document.createElement('div');  // Each marker gets its own div
+  mark.className = 'marker';  // set class name
+
+  // Create popup element
+  const popup = createPopup(country, name);
+
+  // Add marker to map
+  const marker = new mapboxgl.Marker(mark)
+    .setLngLat([lon, lat])
+    .setPopup(popup)  // set the created popup to this marker
+    .addTo(map);  // add marker to map
+
+  markers.push(marker);  // add marker to markers array 
+}
+
+
+// [Load data and add to map]
+// Helper function to load a single circuit and add to map
+async function loadCircuit(id) {
+  try {
+    // Fetch circuit data and decode it as json
+    const response = await fetch(`data/circuits/${id}.geojson`);
+    const circuitData = await response.json();
+
+    // Calculate bearing for directional arrows
+    // (A directional arrow shows which direction the circuit goes when racing)
+    // (Only a single arrow is needed for each circuit, but to know which direction it should point, we need to calculate the angle to the next point in the circuit)
+    const circuitFeatures = circuitData.features[0];  // get the first feature (circuit)
+    const [start, , next] = circuitFeatures.geometry.coordinates;  // get the first point and the next point in the circuit
+    const dx = next[0] - start[0];  // calculate the difference in x coordinates
+    const dy = next[1] - start[1];  // calculate the difference in y coordinates
+    const bearing = (Math.atan2(dx, dy) * 180 / Math.PI + 270) % 360;  // calculate the bearing
+    circuitFeatures.properties.bearing = bearing;  // add the bearing to the circuit data
+
+    // Add individual circuit source to map
+    const circuitId = `circuit-${id}`; // circuit-id
+    map.addSource(circuitId, { 
+      type: 'geojson',
+      data: circuitData,
+      lineMetrics: true // needed for styling
+    });
+
+    // Add circuit layer to map
+    map.addLayer({
+      id: circuitId,
+      type: 'line',
+      source: circuitId,
+      layout: { visibility: 'none' },  // hide circuit layer by default
+      paint: {
+        'line-color': '#FF1E00',
+        'line-width': 3,
+        'line-opacity': 0.95,  // slightly transparent
+        'line-dasharray': [1, 0.5],  // dash pattern
+        'line-gradient': [  // gradient of colors based on line progress (start to finish of circuit)
+          "interpolate",
+          ["linear"], 
+          ["line-progress"],
+          0, "#FF1E00",  // red at start
+          0.3, "#FF4D4D",
+          0.6, "#FF8080",
+          0.8, "#FFB3B3",
+          1, "#FFFFFF"  // white at end
+        ]
+      }
+    });
+
+    // Add directional arrows layer to map
+    map.addLayer({
+      id: `${circuitId}-arrows`,  // {circuit-id}-arrows
+      type: 'symbol',  // symbol layer
+      source: circuitId,  // use the circuit source
+      layout: {
+        visibility: 'none',  // hide by default
+        'symbol-placement': 'point',  // place as a point (not along the line)
+        'icon-image': 'arrow-right',  // use the arrow image we added to the map
+        'icon-rotate': ['get', 'bearing'],  // rotate the arrow based on the bearing we calculated
+        'icon-size': [  // size of the arrow based on zoom level
+          'interpolate',
+          ['linear'],
+          ['zoom'],  
+          8.5, 0.1,  // size 0.1 at zoom 8.5
+          10, 0.15, 
+          12, 0.2,
+          14, 0.25,
+          16, 0.375, 
+          18, 0.5  // size 0.5 at zoom 18 
+        ]
+      }
+    });
+  } catch (error) {
+    console.debug(`Circuit ${id} not found or error loading:`, error);
+  }
+}
+
+// Main function to load all data and add to map
+async function loadMapData() {
+  try {
+    // Fetch point data and decode it as json
+    const response = await fetch('data/championships/f1-locations-2025.json');
+    const data = await response.json();
+    
+    // Add json data to a dictionary where item's location is the key and the value is the item (all the other data+location)
+    trackLocations = data.reduce((dict, item) => {
+      // dict is trackLocations, item is the current item in the data array
+      dict[item.location] = item;
+      return dict; // return the updated dictionary
+    }, {});  // initialize the dictionary with an empty object
+    console.debug("Track Locations loaded:", trackLocations);
+
+    // Create markers and load circuits
+    for (const country in trackLocations) {
+      // Get the data for the current country
+      const lon = trackLocations[country].lon;
+      const lat = trackLocations[country].lat;
+      const name = trackLocations[country].name;
+      const id = trackLocations[country].id;
+
+      // Load circuits, add to map and circuits array
+      circuits.push(loadCircuit(id));
+
+      // Create marker + popup and add to map and markers array
+      createPOI(country, name, lon, lat);
+    }
+
+    // Wait for all circuits to load before continuing 
+    await Promise.all(circuits);
+  } catch (error) {
+    console.error('Error loading track locations:', error);
+  }
+}
 
 // [Map controls]
 // Navigation control
 map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
 
 // Reset zoom control
-const resetZoom = document.getElementById('reset-zoom');
 function updateResetZoomVisibility() {
+  // toggle visibility of reset zoom button when zoom is/isnt default
   const currentZoom = map.getZoom();
-  if (currentZoom !== defaultZoom) {
-    resetZoom.classList.add('visible');
-  } else {
-    resetZoom.classList.remove('visible');
-  }
+  resetZoom.classList.toggle('visible', currentZoom !== defaultZoom);
 }
-updateResetZoomVisibility();
 
-// Add click handler for reset zoom button
+// click handler for reset zoom button
 resetZoom.addEventListener('click', () => {
-    map.easeTo({
-      zoom: defaultZoom,
-      pitch: defaultPitch,
-      bearing: defaultBearing,
-      duration: 1000
-    });
-    // Prevent the button from receiving focus
-    resetZoom.blur();
+  map.easeTo({ // ease to default zoom, pitch, and bearing
+    zoom: defaultZoom,
+    pitch: defaultPitch,
+    bearing: defaultBearing,
+    duration: 1000 // 1 second animation
+  });
+  resetZoom.blur(); // remove focus from button so spacebar can function correctly
 });
-
-// Spin control
-const spinControl = document.getElementById('spin-control');
 
 // Update spin control visibility based on zoom level
 function updateSpinControlVisibility() { 
   const zoom = map.getZoom();
-  if (zoom >= maxSpinZoom) {
+  if (zoom >= maxSpinZoom) {  // if zoom is greater than maxSpinZoom, hide spin control
     spinControl.classList.add('hidden');
     spinControl.classList.remove('disabled');
-  } else {
+  } else {  // if zoom is less than maxSpinZoom, show spin control
     spinControl.classList.remove('hidden');
   }
 }
-updateSpinControlVisibility();
 
 // Update spin control
 function updateSpinControl() {
+  // if spin enabled and user not interacting and no open popups and zoom is less than maxSpinZoom,
   const isActuallySpinning = spinEnabled && !userInteracting && !isAnyPopupOpen() && map.getZoom() < maxSpinZoom;
-  if (isActuallySpinning) {
+  if (isActuallySpinning) {  // then show stop rotation
     spinControl.innerHTML = '<i class="bi bi-pause-fill"></i> Stop Rotation';
-  } else {
+  } else {  // else show resume rotation
     spinControl.innerHTML = '<i class="bi bi-play-fill"></i> Resume Rotation';
   }
 }
 
 // Spin control click handler
 spinControl.addEventListener('click', () => {
-  spinEnabled = !spinEnabled;
-  updateSpinControl();
-  if (spinEnabled) spinGlobe();
-  else map.stop();
-  // Prevent the button from receiving focus
-  spinControl.blur();
+  spinEnabled = !spinEnabled;  // toggle spin enabled
+  updateSpinControl();  // update spin control
+  if (spinEnabled) spinGlobe();  // if spin enabled, spin globe
+  else map.stop();  // else stop spinning
+  spinControl.blur();  // remove focus so spacebar can function correctly
 });
 
-document.addEventListener('keypress', function(event) {
-  if (event.code === 'Space' && map.getZoom() < maxSpinZoom) {
-    spinEnabled = !spinEnabled;
-    updateSpinControl();
-    if (spinEnabled) spinGlobe();
-    else map.stop();
+// keyboard down handler for spin control
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space' && map.getZoom() < maxSpinZoom) {  // if spacebar is pressed down and zoom is less than maxSpinZoom
+    spinEnabled = !spinEnabled;  // toggle spin enabled
+    updateSpinControl();  // update spin control
+    if (spinEnabled) spinGlobe();  // if spin enabled, spin globe
+    else map.stop();  // else stop spinning
+    spinControl.classList.add('active');  // add active class to spin control
+  }
+});
+document.addEventListener('keyup', function(event) {  // spacebar is let go
+  if (event.code === 'Space') {
+    spinControl.classList.remove('active');  // remove active class from spin control
   }
 });
 
-
+// [Event Handlers]
 // User interaction handling
-['mousedown', 'dragstart', 'zoomstart'].forEach(event => {
+['mousedown', 'dragstart', 'zoomstart'].forEach(event => {  // when user starts interacting with map
   map.on(event, () => {
-    userInteracting = true;
-    updateSpinControl();
-    spinControl.classList.add('disabled');
+    userInteracting = true;  // set user interacting to true
+    updateSpinControl();  // update spin control
+    spinControl.classList.add('disabled');  // turn off spin control interaction
   });
 });
 
-['scrollZoom', 'wheel'].forEach(event => {
+['scrollZoom', 'wheel'].forEach(event => {  // when user scrolls or zooms
   map.on(event, () => {
-    userInteracting = true;
-    updateSpinControl();
-    // Check if we're at minimum zoom and reset if so
+    userInteracting = true;  // set user interacting to true
+    updateSpinControl();  // update spin control
+    // Check if we're at minimum zoom and reset interaction flag and spin globe (if enabled)
     if (map.getZoom() <= map.getMinZoom()) {
       userInteracting = false;
       if (spinEnabled) spinGlobe();
@@ -322,57 +414,26 @@ document.addEventListener('keypress', function(event) {
   });
 });
 
-['mouseup', 'dragend', 'zoomend'].forEach(event => {
+['mouseup', 'dragend', 'zoomend'].forEach(event => {  // when user stops interacting with map
   map.on(event, () => {
-    userInteracting = false;
-    if (spinEnabled) spinGlobe();
-    updateSpinControl();
-    spinControl.classList.remove('disabled');
+    if (!isAnyPopupOpen()) {  // if no popups are open
+      userInteracting = false;  // set user interacting to false
+      if (spinEnabled) spinGlobe();  // if spin enabled, spin globe
+      updateSpinControl();  // update spin control
+      spinControl.classList.remove('disabled');  // remove disabled class from spin control (can be pressed)
+    }
   });
 });
 
-map.on('moveend', () => {
-  if (!userInteracting && spinEnabled) spinGlobe();
-  updateSpinControl();
+// map events
+map.on('moveend', () => {  // when user stops moving the map
+  if (!userInteracting && !isAnyPopupOpen() && spinEnabled) spinGlobe();  // if user not interacting and no popups are open and spin enabled, spin globe
+  updateSpinControl();  // update spin control
 });
 
-map.on('zoom', () => {
-  updateMarkersVisibility();
-  updateResetZoomVisibility();
-  updateSpinControlVisibility();
-  updateSpinControl();
+map.on('zoom', () => {  // whenever user zooms, check if we need to update visibility of page elements
+  updateDetailedView();  // update detailed view
+  updateResetZoomVisibility();  // update reset zoom visibility
+  updateSpinControlVisibility();  // update spin control visibility
+  updateSpinControl();  // update spin control
 })
-
-// Add this near the top of the file, after map initialization
-map.on('load', () => {
-  // Create a custom arrow SVG
-  const arrowSvg = `
-    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 12H19M19 12L12 5M19 12L12 19" 
-        stroke="#000" 
-        stroke-width="4" 
-        stroke-linecap="round" 
-        stroke-linejoin="round"
-        fill="none"/>
-      <path d="M5 12H19M19 12L12 5M19 12L12 19" 
-        stroke="#FF1E00" 
-        stroke-width="2" 
-        stroke-linecap="round" 
-        stroke-linejoin="round"
-        fill="none"/>
-    </svg>
-  `;
-  
-  // Convert SVG to data URL
-  const arrowDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(arrowSvg);
-  
-  // Create an image element
-  const img = new Image();
-  img.onload = () => {
-    if (!map.hasImage('arrow-right')) {
-      map.addImage('arrow-right', img);
-    }
-  };
-  img.src = arrowDataUrl;
-});
-
