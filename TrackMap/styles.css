@@ -1,0 +1,486 @@
+/* [Base styles] */
+html, body { 
+  margin: 0; 
+  padding: 0; 
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* [Map container] */
+#map { 
+  position: absolute; 
+  top: 0; 
+  bottom: 0; 
+  width: 100%; 
+  height: 100%;
+}
+
+/* [Markers] */
+.marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 25%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #FF1E00;
+  box-shadow: 0 0 10px rgba(255, 30, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.marker:hover {
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 0 15px rgba(255, 30, 0, 0.8);
+}
+
+.marker.hidden {
+  opacity: 0 !important;
+  transition: opacity 0.5s ease-in-out;
+  pointer-events: none !important;
+}
+
+/* [Popups] */
+.mapboxgl-popup-content { /* Content of the popup */
+  border: 1px solid #FF1E00;
+  min-width: 12.5rem; 
+  font-family: "Titillium Web", sans-serif;
+}
+
+.mapboxgl-popup-content .header {  /* Header/Title of the popup */
+  margin-bottom: 0.5rem;
+  margin-right: 0.25rem;
+  color: #FF1E00;
+  font-family: inherit;  
+  font-size: 18px;
+  font-weight: 700;  
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mapboxgl-popup-content .body { /* Body of the popup */
+  margin-bottom: 0.5rem;  
+  font-family: inherit;  
+  color: #15151E;  
+  font-size: 14px;
+  font-weight: 400;  
+  opacity: 0.90;  
+}
+
+/* Popup tip (the triangle that points to the marker) */
+/* Each popup direction needs its own style */
+/* Top */
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip, 
+.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+  border-bottom-color: #FF1E00 !important;
+  }
+/* Bottom */
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip, 
+.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  border-top-color: #FF1E00 !important;
+  }
+/* Left */
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip { 
+  border-right-color: #FF1E00 !important;
+  }
+/* Right */
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip { 
+  border-left-color: #FF1E00 !important;
+  }
+
+/* [Popup Button] */
+.zoom-to-track {  /* Zoom to track button in popups */
+  width: 100%;  
+  margin-top: 0.5rem;  
+  padding: 0.5rem 1rem;  
+  background: #FF1E00;  
+  border: none;  
+  border-radius: 4px;  
+  outline: none !important;  
+  font-family: inherit;  
+  color: white;  
+  font-weight: 600;  
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer; 
+  transition: all 0.2s ease-in-out; 
+}
+
+.zoom-to-track:hover {  /* Hover effect in popup button */
+  background: #C80F00;  
+  transform: translateY(-1px);  
+  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
+}
+
+.zoom-to-track:active {
+  background: #960a00;  /* Even Darker red button */
+  color: #e6e6e6;  
+  transform: translateY(-2px);  
+  box-shadow: 0 4px 8px rgba(21, 21, 30, 0.5);
+  transition: all 0.1s ease-out;
+}
+
+/* [Top Controls Container] */
+.top-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* [Flag Row] */
+.flag-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: clamp(0.25rem, 1vw, 0.5rem);
+  background: linear-gradient(to right, #15151E, #1E1E2E, #15151E);
+  border-bottom: 2px solid #FF1E00;
+  overflow: hidden;
+  white-space: nowrap;
+  z-index: 2;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  height: clamp(40px, 6vw, 56px);
+  width: 100%;
+  pointer-events: auto;
+}
+
+/* [Title Section] */
+.title-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 1rem;
+  min-width: 120px;
+  border-right: 1px solid rgba(255, 30, 0, 0.3);
+  margin-right: 0.5rem;
+  pointer-events: none;
+}
+
+.title-section h1 {
+  color: #FF1E00;
+  font-family: "Titillium Web", sans-serif;
+  font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  line-height: 1.1;
+}
+
+.title-section .byline {
+  color: #FFFFFF;
+  font-family: "Titillium Web", sans-serif;
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.1;
+}
+
+.flag-container {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  margin: 0 auto;
+  padding: 0.5rem clamp(0.25rem, 0.5vw, 1rem);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  gap: clamp(0.25rem, 0.5vw, 0.75rem);
+}
+
+.flag-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.flag {
+  width: clamp(16px, calc((100vw - 200px) / 24), 32px);
+  height: clamp(16px, calc((100vw - 200px) / 24), 32px);
+  min-width: clamp(16px, calc((100vw - 200px) / 24), 32px);
+  min-height: clamp(16px, calc((100vw - 200px) / 24), 32px);
+  border-radius: 25%;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  object-fit: cover;
+  object-position: center;
+  z-index: 3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background-color: #1E1E2E;
+  flex: 0 0 auto;
+}
+
+.flag:hover {
+  transform: translateY(-2px) scale(1.1);
+  border-color: #FF1E00;
+  box-shadow: 0 4px 8px rgba(255, 30, 0, 0.3);
+}
+
+.flag:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 2px 4px rgba(255, 30, 0, 0.2);
+}
+
+.flag.active {
+  border-color: #FF1E00;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 30, 0, 0.5);
+}
+
+/* [Map Controls] */
+/* General styles for both buttons */
+#spin-control, #reset-zoom {
+  position: relative;
+  z-index: 3;
+  transition: all 0.2s ease-in-out;
+  background: rgba(21, 21, 30, 0.85);
+  color: white;
+  border: 1px solid #FF1E00;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
+}
+
+#spin-control {
+  margin-right: 8px;
+}
+
+#reset-zoom {
+  opacity: 0.5;
+  pointer-events: none;
+  background: rgba(21, 21, 30, 0.5);
+  border-color: #666;
+}
+
+#reset-zoom.visible { /* Visible when zoom isnt at min */
+  opacity: 1;
+  pointer-events: auto;
+  background: rgba(21, 21, 30, 0.85);
+  border-color: #FF1E00;
+}
+
+#spin-control:hover, #reset-zoom:hover { /* Hover effect */
+  background: #FF1E00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(21, 21, 30, 0.3);
+}
+
+#spin-control:active, #reset-zoom:active, #spin-control.active { /* Click effect */
+  transform: translateY(-2px);  
+  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
+  transition: all 0.1s ease-out;
+}
+
+#spin-control.disabled { /* Greyed out when user is interacting */
+  opacity: 0.5;
+  pointer-events: none;
+  background: rgba(21, 21, 30, 0.5);
+  border-color: #666;
+}
+
+#spin-control.hidden {  /* Hidden when at medium to high zoom */
+  opacity: 0;
+  pointer-events: none;
+}
+
+#spin-control i, #reset-zoom i {  /* Icon size */
+  font-size: 1rem;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 8px;
+  margin-top: 8px;
+  pointer-events: auto;
+}
+
+/* [Help Section] */
+.help-section {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 3;
+}
+
+.help-content {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  width: 300px;
+  background: rgba(21, 21, 30, 0.95);
+  border: 2px solid #FF1E00;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: none;
+}
+
+.help-content.active {
+  display: block;
+}
+
+.help-content h2 {
+  color: #FF1E00;
+  font-family: "Titillium Web", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.help-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.help-content li {
+  color: #FFFFFF;
+  font-family: "Titillium Web", sans-serif;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-content li:last-child {
+  margin-bottom: 0;
+}
+
+.help-content li i {
+  color: #FF1E00;
+  font-size: 1rem;
+}
+
+.help-toggle {
+  background: rgba(21, 21, 30, 0.85);
+  color: white;
+  border: 1px solid #FF1E00;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-family: "Titillium Web", sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.help-toggle:hover {
+  background: #FF1E00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(21, 21, 30, 0.3);
+}
+
+.help-toggle:active {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
+}
+
+.help-content .help-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+}
+
+.help-content .help-toggle:hover {
+  background: rgba(255, 30, 0, 0.1);
+}
+
+/* Medium screens (770px to 1120px) */
+@media (min-width: 770px) and (max-width: 1120px) {
+  .flag-row {
+    flex-direction: column;
+    height: auto;
+    padding: 0;
+    width: 100%;
+  }
+
+  .title-section {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 30, 0, 0.3);
+    margin-right: 0;
+    padding: 0.35rem 1rem;
+    text-align: center;
+    background: rgba(21, 21, 30, 0.95);
+  }
+
+  .title-section h1 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+
+  .title-section .byline {
+    font-size: 0.8rem;
+    margin: 0.1rem 0 0;
+  }
+
+  .flag-container {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.35rem 1rem;
+    background: rgba(21, 21, 30, 0.95);
+  }
+}
+
+/* Small screens (below 770px) */
+@media (max-width: 770px) {
+  .flag-row {
+    justify-content: center;
+    height: auto;
+    padding: 0.5rem;
+    background: rgba(21, 21, 30, 0.95);
+  }
+
+  .flag-container {
+    display: none;
+  }
+
+  .title-section {
+    border-right: none;
+    margin-right: 0;
+    text-align: center;
+    padding-bottom: 2px;
+    /* padding: 0.35rem 1rem; */
+  }
+
+  .title-section h1 {
+    font-size: 1.2rem;
+  }
+
+  .title-section .byline {
+    font-size: 0.8rem;
+  }
+}

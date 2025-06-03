@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>F1 Circuits Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js"></script>
+</head>
+<body>
+  <div class="top-controls">
+    <div class="flag-row">
+      <div class="title-section">
+        <h1>Formula 1&trade; 2025</h1>
+        <p class="byline">by Michal Klopotowski</p>
+      </div>
+      <div class="flag-container">
+        <img src="https://flagcdn.com/au.svg" class="flag" onclick="showTrack('Melbourne')" title="Melbourne" alt="Melbourne">
+        <img src="https://flagcdn.com/cn.svg" class="flag" onclick="showTrack('Shanghai')" title="Shanghai" alt="Shanghai">
+        <img src="https://flagcdn.com/jp.svg" class="flag" onclick="showTrack('Suzuka')" title="Suzuka" alt="Suzuka">
+        <img src="https://flagcdn.com/bh.svg" class="flag" onclick="showTrack('Sakhir')" title="Sakhir" alt="Sakhir">
+        <img src="https://flagcdn.com/sa.svg" class="flag" onclick="showTrack('Jeddah')" title="Jeddah" alt="Jeddah">
+        <img src="https://flagcdn.com/us.svg" class="flag" onclick="showTrack('Miami')" title="Miami" alt="Miami">
+        <img src="https://flagcdn.com/it.svg" class="flag" onclick="showTrack('Imola')" title="Imola" alt="Imola">
+        <img src="https://flagcdn.com/mc.svg" class="flag" onclick="showTrack('Monaco')" title="Monaco" alt="Monaco">
+        <img src="https://flagcdn.com/es.svg" class="flag" onclick="showTrack('Barcelona')" title="Barcelona" alt="Barcelona">
+        <img src="https://flagcdn.com/ca.svg" class="flag" onclick="showTrack('Montreal')" title="Montreal" alt="Montreal">
+        <img src="https://flagcdn.com/at.svg" class="flag" onclick="showTrack('Spielberg')" title="Spielberg" alt="Spielberg">
+        <img src="https://flagcdn.com/gb.svg" class="flag" onclick="showTrack('Silverstone')" title="Silverstone" alt="Silverstone">
+        <img src="https://flagcdn.com/be.svg" class="flag" onclick="showTrack('Spa Francorchamps')" title="Spa Francorchamps" alt="Spa Francorchamps">
+        <img src="https://flagcdn.com/hu.svg" class="flag" onclick="showTrack('Budapest')" title="Budapest" alt="Budapest">
+        <img src="https://flagcdn.com/nl.svg" class="flag" onclick="showTrack('Zandvoort')" title="Zandvoort" alt="Zandvoort">
+        <img src="https://flagcdn.com/it.svg" class="flag" onclick="showTrack('Monza')" title="Monza" alt="Monza">
+        <img src="https://flagcdn.com/az.svg" class="flag" onclick="showTrack('Baku')" title="Baku" alt="Baku">
+        <img src="https://flagcdn.com/sg.svg" class="flag" onclick="showTrack('Singapore')" title="Singapore" alt="Singapore">
+        <img src="https://flagcdn.com/us.svg" class="flag" onclick="showTrack('Austin')" title="Austin" alt="Austin">
+        <img src="https://flagcdn.com/mx.svg" class="flag" onclick="showTrack('Mexico City')" title="Mexico City" alt="Mexico City">
+        <img src="https://flagcdn.com/br.svg" class="flag" onclick="showTrack('Sao Paulo')" title="Sao Paulo" alt="Sao Paulo">
+        <img src="https://flagcdn.com/us.svg" class="flag" onclick="showTrack('Las Vegas')" title="Las Vegas" alt="Las Vegas">
+        <img src="https://flagcdn.com/qa.svg" class="flag" onclick="showTrack('Lusail')" title="Lusail" alt="Lusail">
+        <img src="https://flagcdn.com/ae.svg" class="flag" onclick="showTrack('Yas Marina')" title="Yas Marina" alt="Yas Marina">
+      </div>
+    </div>
+    <div class="button-container">
+      <button type="button" id="spin-control" class="btn btn-secondary">
+        <i class="bi bi-pause-fill"></i> Stop Rotation
+      </button>
+      <button type="button" id="reset-zoom" class="btn btn-warning">
+        <i class="bi bi-zoom-in"></i> Reset Zoom
+      </button>
+    </div>
+  </div>
+  <div id="map"></div>
+  <div class="help-section">
+    <div class="help-content">
+      <h2>How to Use This Map</h2>
+      <ul>
+        <li><i class="bi bi-globe"></i> The globe automatically rotates - use the "Stop Rotation" button in the top-left to pause/resume</li>
+        <li><i class="bi bi-flag"></i> Click any flag in the top row to zoom to that circuit</li>
+        <li><i class="bi bi-geo-alt"></i> Click any marker (flag icon) on the map to see circuit details</li>
+        <li><i class="bi bi-zoom-in"></i> Use the "Reset Zoom" button in the top-right to return to the global view</li>
+        <li><i class="bi bi-arrow-right"></i> Zoom in close to a circuit to see its track layout and racing direction</li>
+      </ul>
+      <button class="help-toggle"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <button class="help-toggle"><i class="bi bi-question-circle"></i> Help</button>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>

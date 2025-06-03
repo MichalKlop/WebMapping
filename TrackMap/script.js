@@ -24,6 +24,8 @@ const circuits = [];  // Array to store all circuits
 // elements
 const resetZoom = document.getElementById('reset-zoom');
 const spinControl = document.getElementById('spin-control');
+const helpToggles = document.querySelectorAll('.help-toggle');
+const helpContent = document.querySelector('.help-content');
 
 
 // [Mapbox initialization]
@@ -34,6 +36,7 @@ const map = new mapboxgl.Map({
   style: 'mapbox://styles/michal-k/cmazx0h7z009101sw9nxv7re9',
   projection: 'globe',
   zoom: defaultZoom,
+  pitch: defaultPitch,
   maxZoom: maxZoom,
   minZoom: defaultZoom,
   center: [30, 15]
@@ -78,11 +81,50 @@ function isAnyPopupOpen() {
   return document.querySelector('.mapboxgl-popup') !== null;
 }
 
+// Check and highlight current track based on map view
+function updateActiveFlag() {
+  const currentZoom = map.getZoom();
+  const currentCenter = map.getCenter();
+  
+  // Find the closest track to current center
+  let closestTrack = null;
+  let minDistance = Infinity;
+  
+  for (const country in trackLocations) {
+    const track = trackLocations[country];
+    const distance = Math.sqrt(
+      Math.pow(currentCenter.lng - track.lon, 2) + 
+      Math.pow(currentCenter.lat - track.lat, 2)
+    );
+    
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestTrack = { country, track };
+    }
+  }
+  
+  // Only highlight if we're both zoomed in enough AND close to a track
+  const shouldHighlight = currentZoom >= maxMarkerZoom && closestTrack && minDistance < 0.1;
+  
+  // Remove active class from all flags
+  document.querySelectorAll('.flag').forEach(flag => {
+    flag.classList.remove('active');
+  });
+  
+  // Add active class only if we should highlight
+  if (shouldHighlight) {
+    const activeFlag = document.querySelector(`.flag[title="${closestTrack.country}"]`);
+    if (activeFlag) {
+      activeFlag.classList.add('active');
+    }
+  }
+}
+
 // Show track on map
 function showTrack(country) {
   const track = trackLocations[country];
   if (track) {
-    map.flyTo({ center: [track.lon, track.lat], zoom: track.zoom });
+    map.flyTo({ center: [track.lon, track.lat], zoom: track.zoom, pitch: 45 });
   }
 }
 
@@ -93,7 +135,7 @@ function updateDetailedView() {
   
   // Update markers visibility
   markers.forEach(marker => {
-    const el = marker.getElement();
+    const el = marker.getElement().querySelector('.marker');
     if (isHidden) {
       el.classList.add('hidden');
     } else {
@@ -151,10 +193,14 @@ function spinGlobe() {
 }
 
 // create popup element and add handlers
-function createPopup(country, name) {
-  // Create popup element
-  const popup = new mapboxgl.Popup().setHTML(`
-    <div class="header">${country} GP</div>
+function createPopup(country, region, name) {
+  // Create popup element with offset to point to edge of marker
+  const popup = new mapboxgl.Popup(
+    { 
+      offset: 15  // offset to point to edge of marker
+    }
+  ).setHTML(`
+    <div class="header">${region} Grand Prix</div>
     <div class="body">${name}</div>
     <button class="zoom-to-track">Zoom to Track</button>
   `);
@@ -190,23 +236,68 @@ function createPopup(country, name) {
 }
 
 // create marker and attach popup to it then add to map
-function createPOI(country, name, lon, lat) {
+function createPOI(country, region, name, lon, lat) {
+  // Create wrapper element
+  const wrapper = document.createElement('div');
+  wrapper.className = 'marker-wrapper';
+  
   // Create marker element
-  const mark = document.createElement('div');  // Each marker gets its own div
-  mark.className = 'marker';  // set class name
+  const mark = document.createElement('div');
+  mark.className = 'marker';
+  
+  // Set country flag as background - use region (country name) instead of location (city name)
+  const countryCode = getCountryCode(region);
+  mark.style.backgroundImage = `url('https://flagcdn.com/w80/${countryCode}.png')`;
+
+  // Add marker to wrapper
+  wrapper.appendChild(mark);
 
   // Create popup element
-  const popup = createPopup(country, name);
+  const popup = createPopup(country, region, name);
 
   // Add marker to map
-  const marker = new mapboxgl.Marker(mark)
+  const marker = new mapboxgl.Marker(wrapper)
     .setLngLat([lon, lat])
-    .setPopup(popup)  // set the created popup to this marker
-    .addTo(map);  // add marker to map
+    .setPopup(popup)
+    .addTo(map);
 
-  markers.push(marker);  // add marker to markers array 
+  markers.push(marker);
 }
 
+// Helper function to get country code from country name
+function getCountryCode(country) {
+  const countryMap = {
+    'Australian': 'au',
+    'Chinese': 'cn',
+    'Japanese': 'jp',
+    'Bahrain': 'bh',
+    'Saudi Arabian': 'sa',
+    'Miami': 'us',
+    'Emilia Romagna': 'it',
+    'Monaco': 'mc',
+    'Spanish': 'es',
+    'Canadian': 'ca',
+    'Austrian': 'at',
+    'British': 'gb',
+    'Belgian': 'be',
+    'Hungarian': 'hu',
+    'Dutch': 'nl',
+    'Italian': 'it',
+    'Azerbaijan': 'az',
+    'Singapore': 'sg',
+    'United States': 'us',
+    'Mexico City': 'mx',
+    'Sao Paulo': 'br',
+    'Las Vegas': 'us',
+    'Qatar': 'qa',
+    'Abu Dhabi': 'ae'
+  };
+  const code = countryMap[country] || 'un';
+  if (code === 'un') {
+    console.debug(`Using fallback flag for country: ${country}`);
+  }
+  return code;
+}
 
 // [Load data and add to map]
 // Helper function to load a single circuit and add to map
@@ -268,6 +359,7 @@ async function loadCircuit(id) {
         'symbol-placement': 'point',  // place as a point (not along the line)
         'icon-image': 'arrow-right',  // use the arrow image we added to the map
         'icon-rotate': ['get', 'bearing'],  // rotate the arrow based on the bearing we calculated
+        'icon-rotation-alignment': 'map',  // align rotation with the map
         'icon-size': [  // size of the arrow based on zoom level
           'interpolate',
           ['linear'],
@@ -307,13 +399,14 @@ async function loadMapData() {
       const lon = trackLocations[country].lon;
       const lat = trackLocations[country].lat;
       const name = trackLocations[country].name;
+      const region = trackLocations[country].country;
       const id = trackLocations[country].id;
 
       // Load circuits, add to map and circuits array
       circuits.push(loadCircuit(id));
 
       // Create marker + popup and add to map and markers array
-      createPOI(country, name, lon, lat);
+      createPOI(country, region, name, lon, lat);
     }
 
     // Wait for all circuits to load before continuing 
@@ -429,6 +522,7 @@ document.addEventListener('keyup', function(event) {  // spacebar is let go
 map.on('moveend', () => {  // when user stops moving the map
   if (!userInteracting && !isAnyPopupOpen() && spinEnabled) spinGlobe();  // if user not interacting and no popups are open and spin enabled, spin globe
   updateSpinControl();  // update spin control
+  updateActiveFlag(); // Update active flag based on current view
 });
 
 map.on('zoom', () => {  // whenever user zooms, check if we need to update visibility of page elements
@@ -436,4 +530,20 @@ map.on('zoom', () => {  // whenever user zooms, check if we need to update visib
   updateResetZoomVisibility();  // update reset zoom visibility
   updateSpinControlVisibility();  // update spin control visibility
   updateSpinControl();  // update spin control
+  updateActiveFlag(); // Update active flag state
 })
+
+// Help section toggle
+helpToggles.forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    helpContent.classList.toggle('active');
+    toggle.blur(); // Remove focus so spacebar can function correctly
+  });
+});
+
+// Close help when clicking outside
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.help-section') && helpContent.classList.contains('active')) {
+    helpContent.classList.remove('active');
+  }
+});
