@@ -418,7 +418,12 @@ async function loadMapData() {
 
 // [Map controls]
 // Navigation control
-map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+map.addControl(
+  new mapboxgl.NavigationControl({
+    visualizePitch: true
+  }),
+  'bottom-left'
+);
 
 // Reset zoom control
 function updateResetZoomVisibility() {
