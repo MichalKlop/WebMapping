@@ -21,14 +21,14 @@ let markers = []; // Array to store all markers
 let popups = [];  // Array to store all popups
 const circuits = [];  // Array to store all circuits
 
-// elements
+// DOM elements
 const resetZoom = document.getElementById('reset-zoom');
 const spinControl = document.getElementById('spin-control');
-const helpToggles = document.querySelectorAll('.help-toggle');
+const helpToggle = document.querySelectorAll('.help-toggle');
 const helpContent = document.querySelector('.help-content');
 const circuitInfo = document.querySelector('.circuit-info');
 const flags = document.querySelectorAll('.flag');
-const aboutToggles = document.querySelectorAll('.about-toggle');
+const aboutToggle = document.querySelectorAll('.about-toggle');
 const aboutContent = document.querySelector('.about-content');
 
 
@@ -46,102 +46,67 @@ const map = new mapboxgl.Map({
   center: [30, 15]
 });
 
-// main
-map.on('load', () => {
-  loadMapData();
-  spinGlobe();
-  updateResetZoomVisibility();
-  updateSpinControlVisibility();
-});
-
-// [Map Styling] 
-map.on('style.load', () => {
-  // Fog/atmosphere settings (default from mapbox docs)
-  map.setFog({
-  color: 'rgb(186, 210, 235)', // Lower atmosphere
-  'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
-  'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
-  'space-color': 'rgb(11, 11, 25)', // Background color
-  'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
-  });
-
-  // Add arrow image to map (used in circuit view)
-  // ".svg is not supported when loading images into a style at runtime using map.loadImage()" - mapbox docs
-  // converted the svg to base64 which works as the src for the image
-  const arrowDataUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMSIgY2xhc3M9ImJpIGJpLWNhcmV0LXJpZ2h0LWZpbGwiIHZpZXdCb3g9IjAgMCAxNiAxNiI+CiAgPHBhdGggZD0ibTEyLjE0IDguNzUzLTUuNDgyIDQuNzk2Yy0uNjQ2LjU2Ni0xLjY1OC4xMDYtMS42NTgtLjc1M1YzLjIwNGExIDEgMCAwIDEgMS42NTktLjc1M2w1LjQ4IDQuNzk2YTEgMSAwIDAgMSAwIDEuNTA2eiIvPgo8L3N2Zz4K';
-  const img = new Image();
-  img.src = arrowDataUrl;
-  img.onload = () => {
-    if (!map.hasImage('arrow-right')) {
-      map.addImage('arrow-right', img);
-    }
-  };
-});
-
-
 // [Helper functions]
 // Check if any popup is open
 function isAnyPopupOpen() {
   return document.querySelector('.mapboxgl-popup') !== null;
 }
 
-// Check and highlight current track based on map view
+// Highlight the closest track's flag in flag bar
 function updateActiveFlag() {
-  const currentZoom = map.getZoom();
-  const currentCenter = map.getCenter();
+  // Remove highlight from all flags in flag bar
+  document.querySelectorAll('.flag').forEach(flag => {
+    flag.classList.remove('active');
+  });
+
+  const currentZoom = map.getZoom();  // get current zoom level
+  const currentCenter = map.getCenter();  // get current center of map
   
-  // Find the closest track to current center
-  let closestTrack = null;
-  let minDistance = Infinity;
+  let closestTrack = null;  // init closest track to null
+  let minDistance = Infinity;  // init min distance to infinity
+
+  if (currentZoom < maxMarkerZoom) {  // if zoomed out, don't highlight any flags
+    return;
+  }
   
-  for (const country in trackLocations) {
+  for (const country in trackLocations) {  // for each track,
     const track = trackLocations[country];
-    const distance = Math.sqrt(
+    const distance = Math.sqrt(  // calculate distance between track and current center
       Math.pow(currentCenter.lng - track.lon, 2) + 
       Math.pow(currentCenter.lat - track.lat, 2)
     );
     
-    if (distance < minDistance) {
-      minDistance = distance;
-      closestTrack = { country, track };
+    if (distance < minDistance) {  // if distance is less than min distance,
+      minDistance = distance;  // update min distance
+      closestTrack = { country, track };  // update closest track
     }
   }
-  
-  // Only highlight if we're both zoomed in enough AND close to a track
-  const shouldHighlight = currentZoom >= maxMarkerZoom && closestTrack && minDistance < 0.1;
-  
-  // Remove active class from all flags
-  document.querySelectorAll('.flag').forEach(flag => {
-    flag.classList.remove('active');
-  });
-  
-  // Add active class only if we should highlight
-  if (shouldHighlight) {
-    const activeFlag = document.querySelector(`.flag[title="${closestTrack.country}"]`);
-    if (activeFlag) {
-      activeFlag.classList.add('active');
-    }
-  }
+
+  // highlight the closest track's flag in flag bar
+  const activeFlag = document.querySelector(`.flag[title="${closestTrack.country}"]`);
+  activeFlag.classList.add('active');
 }
 
 // Show track on map
 function showTrack(country) {
   const track = trackLocations[country];
-  if (track) {
-    map.flyTo({ center: [track.lon, track.lat], zoom: track.zoom, pitch: 45 });
-  }
+  map.flyTo({ 
+    center: [track.lon, track.lat], 
+    zoom: track.zoom, 
+    pitch: 45 
+  });
 }
 
-// Update visibility of markers and circuits in detailed zoom levels
+// Update visibility of markers, circuits, and circuit info bar 
 function updateDetailedView() {
   const currentZoom = map.getZoom();
-  const isHidden = currentZoom >= maxMarkerZoom;
+  const notHidden = currentZoom >= maxMarkerZoom;
   const currentCenter = map.getCenter();
   
   // Update markers visibility
   markers.forEach(marker => {
     const el = marker.getElement().querySelector('.marker');
-    if (isHidden) {
+    if (notHidden) {
       el.classList.add('hidden');
     } else {
       el.classList.remove('hidden');
@@ -149,58 +114,55 @@ function updateDetailedView() {
   });
 
   // Find the closest circuit to current center
-  let activeCircuit = null;
-  let minDistance = Infinity;
+  let closestCircuit = null;  // init closest circuit to null
+  let minDistance = Infinity;  // init min distance to infinity
   
-  for (const country in trackLocations) {
-    const circuit = trackLocations[country];
-    const layerId = `circuit-${circuit.id}`;
-    const layerIdArrows = layerId + '-arrows';
+  for (const country in trackLocations) {  // for each track,
+    const circuit = trackLocations[country];  // get the circuit data
+    const layerId = `circuit-${circuit.id}`;  // get the circuit layer id
+    const layerIdArrows = layerId + '-arrows';  // get the circuit arrows layer id
 
     // Update circuit view visibility
     map.setLayoutProperty(
-      layerId,
-      'visibility',
-      isHidden ? 'visible' : 'none'
+      layerId,  // circuit layer,
+      'visibility',  // visibility property
+      notHidden ? 'visible' : 'none'  // if notHidden, show the circuit, otherwise hide it
     );
     map.setLayoutProperty(
-      layerIdArrows,
-      'visibility',
-      isHidden ? 'visible' : 'none'
+      layerIdArrows,  // circuit directional arrows layer,
+      'visibility',  // visibility property
+      notHidden ? 'visible' : 'none'  // if notHidden, show the directional arrows, otherwise hide them
     );
 
     // If we're zoomed in enough, find the closest circuit
-    if (isHidden) {
-      const distance = Math.sqrt(
+    if (notHidden) {
+      const distance = Math.sqrt(  // calculate distance between circuit and current center
         Math.pow(currentCenter.lng - circuit.lon, 2) + 
         Math.pow(currentCenter.lat - circuit.lat, 2)
       );
       
-      if (distance < minDistance) {
-        minDistance = distance;
-        activeCircuit = circuit;
+      if (distance < minDistance) {  // if distance is less than min distance,
+        minDistance = distance;  // update min distance
+        closestCircuit = circuit;  // update closest circuit
       }
     }
   }
 
-  // Only show circuit info if we're close enough to a circuit
-  if (activeCircuit && minDistance < 0.1) {
-    updateCircuitInfo(activeCircuit);
+  // update circuit info bar if close enough to a circuit. otherwise hide the bar
+  if (notHidden) {
+    updateCircuitInfo(closestCircuit);
     circuitInfo.classList.add('active');
   } else {
     circuitInfo.classList.remove('active');
   }
 }
 
-// Update circuit info panel with circuit data
+// Update circuit info bar with circuit data
 function updateCircuitInfo(circuit) {
-  // Update circuit name
   circuitInfo.querySelector('.circuit-name').textContent = circuit.name;
-  
-  // Update circuit details
   circuitInfo.querySelector('.first-gp').textContent = circuit.firstgp;
   circuitInfo.querySelector('.laps').textContent = circuit.laps;
-  circuitInfo.querySelector('.length').textContent = `${(circuit.length / 1000).toFixed(3)} km`;
+  circuitInfo.querySelector('.length').textContent = `${(circuit.length / 1000).toFixed(3)} km`;  // format length to 3 decimal places
   circuitInfo.querySelector('.altitude').textContent = `${circuit.altitude} m`;
   circuitInfo.querySelector('.lap-record .time').textContent = circuit.lap_record;
   circuitInfo.querySelector('.lap-record .holder').textContent = circuit.record_holder;
@@ -234,119 +196,10 @@ function spinGlobe() {
   });
 }
 
-// create popup element and add handlers
-function createPopup(country, region, name, firstgp, laps, length, altitude, lap_record, record_holder) {
-  // Create popup element with offset to point to edge of marker
-  const popup = new mapboxgl.Popup(
-    { 
-      offset: 15,  // offset to point to edge of marker
-      maxWidth: '300px'  // Set max width for better readability
-    }
-  ).setHTML(`
-    <div class="header">${region} Grand Prix</div>
-    <div class="body">
-      <div class="circuit-name">${name}</div>
-      <div class="circuit-details">
-        <div class="detail-item">
-          <i class="bi bi-trophy"></i>
-          <span class="label">First Grand Prix:</span>
-          <span class="value">${firstgp}</span>
-        </div>
-        <div class="detail-item">
-          <i class="bi bi-arrow-repeat"></i>
-          <span class="label">Laps:</span>
-          <span class="value">${laps}</span>
-        </div>
-        <div class="detail-item">
-          <i class="bi bi-rulers"></i>
-          <span class="label">Length:</span>
-          <span class="value">${(length / 1000).toFixed(3)} km</span>
-        </div>
-        <div class="detail-item">
-          <i class="bi bi-arrow-up"></i>
-          <span class="label">Altitude:</span>
-          <span class="value">${altitude} m</span>
-        </div>
-        <div class="detail-item">
-          <i class="bi bi-stopwatch"></i>
-          <span class="label">Lap Record:</span>
-          <span class="value lap-record">
-            <span class="time">${lap_record}</span>
-            <span class="holder">${record_holder}</span>
-          </span>
-        </div>
-      </div>
-      <button class="zoom-to-track">Zoom to Track</button>
-    </div>
-  `);
-
-  // Add popup handlers (open, close)
-  popup.on('open', () => {
-    userInteracting = true;  // User is interacting with the popup
-    if (spinEnabled) {  // if spin is enabled, stop spinning
-      map.stop();
-    }
-    spinControl.classList.add('disabled');  // disable spin control
-
-    const button = popup.getElement().querySelector('.zoom-to-track');  // grab zoom to track button
-    button.blur();  // if pressed previously, "blurring" removes focus/highlighting so spacebar can function correctly
-    button.addEventListener('click', () => {  // on click of button, remove popup and zoom to track
-      popup.remove();
-      showTrack(country);
-    });
-  });
-
-  popup.on('close', () => {
-    userInteracting = false;  // User stopped interacting with the popup
-    spinControl.classList.remove('disabled');  // make spin control interactable again
-    if (spinEnabled) {  // if spin is enabled, resume spinning
-      spinGlobe();
-      updateSpinControl();
-    }
-  });
-
-  // add popup to popups array and return it
-  popups.push(popup); 
-  return popup;
-}
-
-// create marker and attach popup to it then add to map
-function createPOI(country, region, name, lon, lat, firstgp, laps, length, altitude, lap_record, record_holder) {
-  // Create wrapper element
-  const wrapper = document.createElement('div');
-  wrapper.className = 'marker-wrapper';
-  
-  // Create marker element
-  const mark = document.createElement('div');
-  mark.className = 'marker';
-  
-  // Set country flag as background - use region (country name) instead of location (city name)
-  const countryCode = getCountryCode(region);
-  mark.style.backgroundImage = `url('https://flagcdn.com/w80/${countryCode}.png')`;
-
-  // Set background position for specific countries
-  if (['Melbourne', 'Shanghai', 'Sakhir', 'Miami', 'Austin', 'Las Vegas', 'Lusail', 'Yas Marina'].includes(country)) {
-    mark.style.backgroundPosition = '25% center';
-  }
-
-  // Add marker to wrapper
-  wrapper.appendChild(mark);
-
-  // Create popup element
-  const popup = createPopup(country, region, name, firstgp, laps, length, altitude, lap_record, record_holder);
-
-  // Add marker to map
-  const marker = new mapboxgl.Marker(wrapper)
-    .setLngLat([lon, lat])
-    .setPopup(popup)
-    .addTo(map);
-
-  markers.push(marker);
-}
-
 // Helper function to get country code from country name
 function getCountryCode(country) {
-  const countryMap = {
+  // dictionary where the key is the country name and the value is the country code
+  const countryMap = {  
     'Australian': 'au',
     'Chinese': 'cn',
     'Japanese': 'jp',
@@ -372,14 +225,14 @@ function getCountryCode(country) {
     'Qatar': 'qa',
     'Abu Dhabi': 'ae'
   };
-  const code = countryMap[country] || 'un';
+  const code = countryMap[country] || 'un';  // if country is not found, use united nations as fallback
   if (code === 'un') {
     console.debug(`Using fallback flag for country: ${country}`);
   }
   return code;
 }
 
-// [Load data and add to map]
+// [Data loading functions]
 // Helper function to load a single circuit and add to map
 async function loadCircuit(id) {
   try {
@@ -495,17 +348,127 @@ async function loadMapData() {
       createPOI(country, region, name, lon, lat, firstgp, laps, length, altitude, lap_record, record_holder);
     }
 
-    // Wait for all circuits to load before continuing 
+    // Wait for all circuits to load before continuing (load at the same time)
     await Promise.all(circuits);
   } catch (error) {
     console.error('Error loading track locations:', error);
   }
 }
 
+// create popup element and add handlers
+function createPopup(country, region, name, firstgp, laps, length, altitude, lap_record, record_holder) {
+  // Create popup element with offset to point to edge of marker
+  const popup = new mapboxgl.Popup(
+    { 
+      offset: 15,  // offset to point to edge of marker
+      maxWidth: '300px'
+    }
+  ).setHTML(`
+    <div class="header">${region} Grand Prix</div>
+    <div class="body">
+      <div class="circuit-name">${name}</div>
+      <div class="circuit-details">
+        <div class="detail-item">
+          <i class="bi bi-trophy"></i>
+          <span class="label">First Grand Prix:</span>
+          <span class="value">${firstgp}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-flag-checkered"></i>
+          <span class="label">Laps:</span>
+          <span class="value">${laps}</span>
+        </div>
+        <div class="detail-item">
+          <i class="bi bi-rulers"></i>
+          <span class="label">Length:</span>
+          <span class="value">${(length / 1000).toFixed(3)} km</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-mountain"></i>
+          <span class="label">Altitude:</span>
+          <span class="value">${altitude} m</span>
+        </div>
+        <div class="detail-item">
+          <i class="bi bi-stopwatch"></i>
+          <span class="label">Lap Record:</span>
+          <span class="value lap-record">
+            <span class="time">${lap_record}</span>
+            <span class="holder">${record_holder}</span>
+          </span>
+        </div>
+      </div>
+      <button class="zoom-to-track">View Track Layout <i class="bi bi-arrow-right"></i></button>
+    </div>
+  `);
+
+  // Add popup handlers (open, close)
+  popup.on('open', () => {
+    userInteracting = true;  // User is interacting with the popup
+    if (spinEnabled) {  // if spin is enabled, stop spinning
+      map.stop();
+    }
+    spinControl.classList.add('disabled');  // disable spin control
+
+    const button = popup.getElement().querySelector('.zoom-to-track');  // grab zoom to track button
+    button.blur();  // if pressed previously, "blurring" removes focus/highlighting so spacebar can function correctly
+    button.addEventListener('click', () => {  // on click of button, remove popup and zoom to track
+      popup.remove();
+      showTrack(country);
+    });
+  });
+
+  popup.on('close', () => {
+    userInteracting = false;  // User stopped interacting with the popup
+    spinControl.classList.remove('disabled');  // make spin control interactable again
+    if (spinEnabled) {  // if spin is enabled, resume spinning
+      spinGlobe();
+      updateSpinControl();
+    }
+  });
+
+  // add popup to popups array and return it
+  popups.push(popup); 
+  return popup;
+}
+
+// create marker and attach popup to it then add to map
+function createPOI(country, region, name, lon, lat, firstgp, laps, length, altitude, lap_record, record_holder) {
+  // Create wrapper element
+  const wrapper = document.createElement('div');
+  wrapper.className = 'marker-wrapper';
+
+  // Create marker element
+  const mark = document.createElement('div');
+  mark.className = 'marker';
+
+  // Set country flag as background
+  const countryCode = getCountryCode(region);
+  mark.style.backgroundImage = `url('https://flagcdn.com/w80/${countryCode}.png')`;
+
+  // Set flag background position for specific countries (to show the flag in the middle of the marker)
+  if (['Melbourne', 'Shanghai', 'Sakhir', 'Miami', 'Austin', 'Las Vegas', 'Lusail', 'Yas Marina'].includes(country)) {
+    mark.style.backgroundPosition = '25% center';
+  }
+
+  // Add marker to wrapper
+  wrapper.appendChild(mark);
+
+  // Create popup element
+  const popup = createPopup(country, region, name, firstgp, laps, length, altitude, lap_record, record_holder);
+
+  // Add marker to map
+  const marker = new mapboxgl.Marker(wrapper)
+    .setLngLat([lon, lat])
+    .setPopup(popup)
+    .addTo(map);
+
+  markers.push(marker);
+}
+
 // [Map controls]
 // Navigation control
 const navControl = new mapboxgl.NavigationControl({
-  visualizePitch: true
+  visualizePitch: true  // show pitch indicator
 });
 document.getElementById('nav-control-container').appendChild(navControl.onAdd(map));
 
@@ -515,17 +478,6 @@ function updateResetZoomVisibility() {
   const currentZoom = map.getZoom();
   resetZoom.classList.toggle('visible', currentZoom !== defaultZoom);
 }
-
-// click handler for reset zoom button
-resetZoom.addEventListener('click', () => {
-  map.easeTo({ // ease to default zoom, pitch, and bearing
-    zoom: defaultZoom,
-    pitch: defaultPitch,
-    bearing: defaultBearing,
-    duration: 1000 // 1 second animation
-  });
-  resetZoom.blur(); // remove focus from button so spacebar can function correctly
-});
 
 // Update spin control visibility based on zoom level
 function updateSpinControlVisibility() { 
@@ -548,31 +500,6 @@ function updateSpinControl() {
     spinControl.innerHTML = '<i class="bi bi-play-fill"></i> Resume Rotation';
   }
 }
-
-// Spin control click handler
-spinControl.addEventListener('click', () => {
-  spinEnabled = !spinEnabled;  // toggle spin enabled
-  updateSpinControl();  // update spin control
-  if (spinEnabled) spinGlobe();  // if spin enabled, spin globe
-  else map.stop();  // else stop spinning
-  spinControl.blur();  // remove focus so spacebar can function correctly
-});
-
-// keyboard down handler for spin control
-document.addEventListener('keydown', function(event) {
-  if (event.code === 'Space' && map.getZoom() < maxSpinZoom) {  // if spacebar is pressed down and zoom is less than maxSpinZoom
-    spinEnabled = !spinEnabled;  // toggle spin enabled
-    updateSpinControl();  // update spin control
-    if (spinEnabled) spinGlobe();  // if spin enabled, spin globe
-    else map.stop();  // else stop spinning
-    spinControl.classList.add('active');  // add active class to spin control
-  }
-});
-document.addEventListener('keyup', function(event) {  // spacebar is let go
-  if (event.code === 'Space') {
-    spinControl.classList.remove('active');  // remove active class from spin control
-  }
-});
 
 // [Event Handlers]
 // User interaction handling
@@ -623,7 +550,7 @@ map.on('zoom', () => {  // whenever user zooms, check if we need to update visib
 })
 
 // Help section toggle
-helpToggles.forEach(toggle => {
+helpToggle.forEach(toggle => {
   toggle.addEventListener('click', () => {
     helpContent.classList.toggle('active');
     toggle.blur(); // Remove focus so spacebar can function correctly
@@ -632,13 +559,13 @@ helpToggles.forEach(toggle => {
 
 // Close help when clicking outside
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.help-section') && helpContent.classList.contains('active')) {
+  if (!event.target.closest('.help-box') && helpContent.classList.contains('active')) {
     helpContent.classList.remove('active');
   }
 });
 
 // About section toggle
-aboutToggles.forEach(toggle => {
+aboutToggle.forEach(toggle => {
   toggle.addEventListener('click', () => {
     aboutContent.classList.toggle('active');
     toggle.blur(); // Remove focus so spacebar can function correctly
@@ -647,50 +574,113 @@ aboutToggles.forEach(toggle => {
 
 // Close about when clicking outside
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.about-section') && aboutContent.classList.contains('active')) {
+  if (!event.target.closest('.about-box') && aboutContent.classList.contains('active')) {
     aboutContent.classList.remove('active');
   }
 });
 
 // Add hover event listeners to flags
 flags.forEach(flag => {
-  flag.addEventListener('mouseenter', () => {
-    const country = flag.getAttribute('title');
-    const circuit = trackLocations[country];
-    if (circuit) {
-      updateCircuitInfo(circuit);
-      circuitInfo.classList.add('active');
-    }
+  flag.addEventListener('mouseenter', () => {  // on hover,
+    const country = flag.getAttribute('title');  // get the country name
+    const circuit = trackLocations[country];  
+    updateCircuitInfo(circuit);  // update the circuit info bar
+    circuitInfo.classList.add('active');  
   });
 
-  flag.addEventListener('mouseleave', () => {
+  flag.addEventListener('mouseleave', () => {  // on exit hover,
+    const notHidden = map.getZoom() >= maxMarkerZoom;
     // If we're zoomed in close to a circuit, find and show that circuit's info
-    if (map.getZoom() >= maxMarkerZoom) {
-      const currentCenter = map.getCenter();
-      let closestCircuit = null;
-      let minDistance = Infinity;
+    if (notHidden) {
+      const currentCenter = map.getCenter();  // get the current center of the map
+      let closestCircuit = null;  // init closest circuit to null
+      let minDistance = Infinity;  // init min distance to infinity
       
-      for (const country in trackLocations) {
+      for (const country in trackLocations) {  // for each track,
         const circuit = trackLocations[country];
-        const distance = Math.sqrt(
+        const distance = Math.sqrt(  // calculate distance between circuit and current center
           Math.pow(currentCenter.lng - circuit.lon, 2) + 
           Math.pow(currentCenter.lat - circuit.lat, 2)
         );
         
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestCircuit = circuit;
+        if (distance < minDistance) {  // if distance is less than min distance,
+          minDistance = distance;  // update min distance
+          closestCircuit = circuit;  // update closest circuit
         }
       }
       
-      if (closestCircuit && minDistance < 0.1) {
-        updateCircuitInfo(closestCircuit);
-        circuitInfo.classList.add('active');
-      } else {
-        circuitInfo.classList.remove('active');
-      }
-    } else {
+      updateCircuitInfo(closestCircuit);  // update the circuit info bar
+      circuitInfo.classList.add('active');  // show the circuit info bar
+    } else {  // if not zoomed in close enough to a circuit, hide the circuit info bar
       circuitInfo.classList.remove('active');
     }
   });
+});
+
+// [Map Styling] 
+map.on('style.load', () => {
+  // Fog/atmosphere settings (default from mapbox docs)
+  map.setFog({
+  color: 'rgb(186, 210, 235)', // Lower atmosphere
+  'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
+  'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
+  'space-color': 'rgb(11, 11, 25)', // Background color
+  'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
+  });
+
+  // Add arrow image to map (used in circuit view)
+  // ".svg is not supported when loading images into a style at runtime using map.loadImage()" - mapbox docs
+  // converted the svg to base64 which works as the src for the image
+  const arrowDataUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMSIgY2xhc3M9ImJpIGJpLWNhcmV0LXJpZ2h0LWZpbGwiIHZpZXdCb3g9IjAgMCAxNiAxNiI+CiAgPHBhdGggZD0ibTEyLjE0IDguNzUzLTUuNDgyIDQuNzk2Yy0uNjQ2LjU2Ni0xLjY1OC4xMDYtMS42NTgtLjc1M1YzLjIwNGExIDEgMCAwIDEgMS42NTktLjc1M2w1LjQ4IDQuNzk2YTEgMSAwIDAgMSAwIDEuNTA2eiIvPgo8L3N2Zz4K';
+  const img = new Image();
+  img.src = arrowDataUrl;
+  img.onload = () => {
+    if (!map.hasImage('arrow-right')) {
+      map.addImage('arrow-right', img);
+    }
+  };
+});
+
+// [Main initialization]
+map.on('load', () => {
+  loadMapData();
+  spinGlobe();
+  updateResetZoomVisibility();
+  updateSpinControlVisibility();
+});
+
+// click handler for reset zoom button
+resetZoom.addEventListener('click', () => {
+  map.easeTo({ // ease to default zoom, pitch, and bearing
+    zoom: defaultZoom,
+    pitch: defaultPitch,
+    bearing: defaultBearing,
+    duration: 1000 // 1 second animation
+  });
+  resetZoom.blur(); // remove focus from button so spacebar can function correctly
+});
+
+// Spin control click handler
+spinControl.addEventListener('click', () => {
+  spinEnabled = !spinEnabled;  // toggle spin enabled
+  updateSpinControl();  // update spin control
+  if (spinEnabled) spinGlobe();  // if spin enabled, spin globe
+  else map.stop();  // else stop spinning
+  spinControl.blur();  // remove focus so spacebar can function correctly
+});
+
+// keyboard down handler for spin control
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space' && map.getZoom() < maxSpinZoom) {  // if spacebar is pressed down and zoom is less than maxSpinZoom
+    spinEnabled = !spinEnabled;  // toggle spin enabled
+    updateSpinControl();  // update spin control
+    if (spinEnabled) spinGlobe();  // if spin enabled, spin globe
+    else map.stop();  // else stop spinning
+    spinControl.classList.add('active');  // add active class to spin control
+  }
+});
+document.addEventListener('keyup', function(event) {  // spacebar is let go
+  if (event.code === 'Space') {
+    spinControl.classList.remove('active');  // remove active class from spin control
+  }
 });

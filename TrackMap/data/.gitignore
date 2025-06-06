@@ -1,2 +1,12 @@
-qgis
-.nova
+championships/f1-locations-2020.json
+championships/f1-locations-2021.json
+championships/f1-locations-2022.json
+championships/f1-locations-2023.json
+championships/f1-locations-2024.json
+championships/f1-locations-2025.json
+circuit-images/
+f1-circuits.geojson
+f1-locations.geojson
+f1-locations.json
+LICENSE.md
+README.md

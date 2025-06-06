@@ -1,4 +1,8 @@
-/* [Base styles] */
+/* ============================================
+ * Base styles
+ * ============================================
+*/
+ /* [Basic HTML] */
 html, body { 
   margin: 0; 
   padding: 0; 
@@ -7,7 +11,10 @@ html, body {
   overflow: hidden;
 }
 
-/* [Map container] */
+/* ============================================
+ * Map container
+ * ============================================
+*/
 #map { 
   position: absolute; 
   top: 0; 
@@ -16,8 +23,12 @@ html, body {
   height: 100%;
 }
 
+/* ============================================
+ * Core Components
+ * ============================================
+*/
 /* [Markers] */
-.marker {
+.marker {  /* Basic Marker */
   width: 40px;
   height: 40px;
   border-radius: 25%;
@@ -29,13 +40,13 @@ html, body {
   cursor: pointer;
 }
 
-.marker:hover {
+.marker:hover {  /* Hover effect */
   width: 44px;
   height: 44px;
   box-shadow: 0 0 15px rgba(255, 30, 0, 0.8);
 }
 
-.marker.hidden {
+.marker.hidden {  /* Hidden marker */
   opacity: 0 !important;
   transition: opacity 0.5s ease-in-out;
   pointer-events: none !important;
@@ -69,7 +80,7 @@ html, body {
   opacity: 0.90;  
 }
 
-.mapboxgl-popup-content .circuit-name {
+.mapboxgl-popup-content .circuit-name {  /* Circuit name / Popup title */
   font-size: 16px;
   font-weight: 600;
   color: #15151E;
@@ -78,7 +89,7 @@ html, body {
   letter-spacing: 0.5px;
 }
 
-.mapboxgl-popup-content .circuit-details {
+.mapboxgl-popup-content .circuit-details {  /* Circuit details / Popup body */
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.5rem;
@@ -86,50 +97,47 @@ html, body {
   width: 100%;
 }
 
-.mapboxgl-popup-content .detail-item {
+.mapboxgl-popup-content .detail-item {  /* Circuit details formatting */
   display: grid;
-  grid-template-columns: 20px 120px 1fr;
+  grid-template-columns: 16px 120px 1fr;
   align-items: center;
   gap: 0.5rem;
   width: 100%;
 }
 
-.mapboxgl-popup-content .detail-item i {
+.mapboxgl-popup-content .detail-item i {  /* Icon */
   color: #FF1E00;
-  font-size: 0.9rem;
-  width: 20px;
-  text-align: center;
+  width: 16px;
+  height: 16px;
+  display: flex;
 }
 
-.mapboxgl-popup-content .detail-item .label {
+.mapboxgl-popup-content .detail-item .label {  /* Label */
   color: #666;
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  white-space: nowrap;
 }
 
-.mapboxgl-popup-content .detail-item .value {
+.mapboxgl-popup-content .detail-item .value {  /* Value */
   color: #15151E;
   font-size: 0.9rem;
   font-weight: 500;
-  white-space: nowrap;
 }
 
-.mapboxgl-popup-content .detail-item .value.lap-record {
+.mapboxgl-popup-content .detail-item .value.lap-record {  /* Lap record value formatting*/
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
   white-space: normal;
 }
 
-.mapboxgl-popup-content .detail-item .value.lap-record .time {
+.mapboxgl-popup-content .detail-item .value.lap-record .time {  /* Lap record time value */
   font-size: 0.9rem;
   font-weight: 600;
 }
 
-.mapboxgl-popup-content .detail-item .value.lap-record .holder {
+.mapboxgl-popup-content .detail-item .value.lap-record .holder {  /* Lap record holder value */
   font-size: 0.8rem;
   opacity: 0.8;
   font-style: italic;
@@ -137,24 +145,23 @@ html, body {
 
 /* Popup tip (the triangle that points to the marker) */
 /* Each popup direction needs its own style */
-/* Top */
-.mapboxgl-popup-anchor-top .mapboxgl-popup-tip, 
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,  /* Top */
 .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
 .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
   border-bottom-color: #FF1E00 !important;
   }
-/* Bottom */
-.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip, 
+
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,  /* Bottom */
 .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
 .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
   border-top-color: #FF1E00 !important;
   }
-/* Left */
-.mapboxgl-popup-anchor-left .mapboxgl-popup-tip { 
+
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {  /* Left */
   border-right-color: #FF1E00 !important;
   }
-/* Right */
-.mapboxgl-popup-anchor-right .mapboxgl-popup-tip { 
+
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {  /* Right */
   border-left-color: #FF1E00 !important;
   }
 
@@ -183,7 +190,7 @@ html, body {
   box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
 }
 
-.zoom-to-track:active {
+.zoom-to-track:active {  /* Click effect */
   background: #960a00;  /* Even Darker red button */
   color: #e6e6e6;  
   transform: translateY(-2px);  
@@ -191,6 +198,17 @@ html, body {
   transition: all 0.1s ease-out;
 }
 
+.zoom-to-track i {  /* Icon */
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+/* ============================
+ * Layout Components
+ * ============================
+*/
 /* [Top Controls Container] */
 .top-controls {
   position: absolute;
@@ -201,11 +219,11 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 /* [Flag Row] */
-.flag-row {
+.flag-row {  /* flag row formatting including title section*/
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -222,8 +240,7 @@ html, body {
   pointer-events: auto;
 }
 
-/* [Title Section] */
-.title-section {
+.title-section {  /* Title formatting */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -231,10 +248,9 @@ html, body {
   min-width: 120px;
   border-right: 1px solid rgba(255, 30, 0, 0.3);
   margin-right: 0.5rem;
-  pointer-events: none;
 }
 
-.title-section h1 {
+.title-section h1 {  /* Title Text */
   color: #FF1E00;
   font-family: "Titillium Web", sans-serif;
   font-size: clamp(1.1rem, 1.5vw, 1.4rem);
@@ -246,7 +262,7 @@ html, body {
   line-height: 1.1;
 }
 
-.title-section .byline {
+.title-section .byline {  /* Title byline */
   color: #FFFFFF;
   font-family: "Titillium Web", sans-serif;
   font-size: clamp(0.65rem, 0.9vw, 0.8rem);
@@ -255,23 +271,16 @@ html, body {
   line-height: 1.1;
 }
 
-.flag-container {
+.flag-container {  /* Flag section container formatting */
   display: flex;
   justify-content: space-between;
   flex: 1;
   margin: 0 auto;
   padding: 0.5rem clamp(0.25rem, 0.5vw, 1rem);
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
   gap: clamp(0.25rem, 0.5vw, 0.75rem);
 }
 
-.flag-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-.flag {
+.flag {  /* Individual flag formatting */
   width: clamp(16px, calc((100vw - 200px) / 24), 32px);
   height: clamp(16px, calc((100vw - 200px) / 24), 32px);
   min-width: clamp(16px, calc((100vw - 200px) / 24), 32px);
@@ -289,6 +298,23 @@ html, body {
   flex: 0 0 auto;
 }
 
+.flag:hover {  /* Hover effect */
+  transform: translateY(-2px) scale(1.1);
+  border-color: #FF1E00;
+  box-shadow: 0 4px 8px rgba(255, 30, 0, 0.3);
+}
+
+.flag:active {  /* Click effect */
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 2px 4px rgba(255, 30, 0, 0.2);
+}
+
+.flag.active {  /* Flag highlight effect */
+  border-color: #FF1E00;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 30, 0, 0.5);
+}
+
 /* Shift specific flags to the left */
 .flag[title="Melbourne"],
 .flag[title="Shanghai"],
@@ -301,26 +327,112 @@ html, body {
   object-position: 25% center;
 }
 
-.flag:hover {
-  transform: translateY(-2px) scale(1.1);
-  border-color: #FF1E00;
-  box-shadow: 0 4px 8px rgba(255, 30, 0, 0.3);
+/* [Circuit Details Bar] */
+.circuit-info {  /* Circuit details bar formatting (hidden by default) */
+  pointer-events: none;
+  width: 100%;
+  opacity: 0;
+  height: 0;
 }
 
-.flag:active {
-  transform: translateY(0) scale(0.95);
-  box-shadow: 0 2px 4px rgba(255, 30, 0, 0.2);
+.circuit-info.active {  /* Active state */
+  opacity: 1;
+  height: auto;
 }
 
-.flag.active {
-  border-color: #FF1E00;
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 30, 0, 0.5);
+.circuit-info-content {  /* Circuit details bar content formatting */
+  background: rgba(21, 21, 30, 0.95);
+  border-bottom: 2px solid #FF1E00;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
-/* [Map Controls] */
-/* General styles for both buttons */
-#spin-control, #reset-zoom {
+.circuit-info h2 {  /* Circuit details title (track name) formatting */
+  color: #FF1E00;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  display: inline-block;
+  padding-right: 1rem;
+  border-right: 1px solid rgba(255, 30, 0, 0.3);
+  min-width: 200px;
+}
+
+.circuit-details {  /* Circuit details container formatting */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  margin: 0 1rem;
+}
+
+.detail-item {  /* Circuit  individualdetails item formatting */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-item i {  /* Icon */
+  color: #FF1E00;
+  width: 16px;
+  height: 16px;
+  display: flex;
+}
+
+.detail-item .label {  /* Detail label */
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.detail-item .value {  /* Detail value */
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.detail-item .value.lap-record {  /* Lap record value formatting */
+  display: flex;
+  flex-direction: column;
+  white-space: normal;
+}
+
+.detail-item .value.lap-record .time {  /* Lap record time value */
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.detail-item .value.lap-record .holder {  /* Lap record holder value */
+  font-size: 0.65rem;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+/* ============================
+ * Interaction Components
+ * ============================
+*/
+/* [Buttons] */
+.button-container {  /* Button container formatting (holds spin and reset zoom) */
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 8px;
+  margin-top: 8px;
+  pointer-events: auto;
+  transition: margin-top 0.3s ease-in-out;
+}
+
+#spin-control, #reset-zoom {  /* Spin and reset zoom buttons formatting */
   position: relative;
   z-index: 3;
   transition: all 0.2s ease-in-out;
@@ -329,7 +441,6 @@ html, body {
   border: 1px solid #FF1E00;
   border-radius: 4px;
   padding: 0.5rem 1rem;
-  font-family: inherit;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
@@ -341,15 +452,16 @@ html, body {
   box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
 }
 
-#spin-control {
+#spin-control {  /* Spin button formatting */
   margin-right: 8px;
 }
 
-#reset-zoom {
+#reset-zoom {  /* Reset zoom button formatting (hidden by default) */
   opacity: 0.5;
   pointer-events: none;
   background: rgba(21, 21, 30, 0.5);
   border-color: #666;
+  margin-left: 8px;
 }
 
 #reset-zoom.visible { /* Visible when zoom isnt at min */
@@ -384,152 +496,196 @@ html, body {
 }
 
 #spin-control i, #reset-zoom i {  /* Icon size */
-  font-size: 1rem;
+  width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
 }
 
-/* [Circuit Info Panel] */
-.circuit-info {
-  width: 100%;
-  pointer-events: auto;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  height: 0;
-  overflow: hidden;
-}
-
-.circuit-info.active {
-  opacity: 1;
-  height: auto;
-}
-
-.circuit-info-content {
-  background: rgba(21, 21, 30, 0.95);
-  border-bottom: 2px solid #FF1E00;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.circuit-info h2 {
-  color: #FF1E00;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-align: center;
-  display: inline-block;
-  padding-right: 1rem;
-  border-right: 1px solid rgba(255, 30, 0, 0.3);
-  min-width: 200px;
-}
-
-.circuit-details {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
-  /* margin-left: 1rem; */
-  margin: 0 1rem;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-}
-
-.detail-item i {
-  color: #FF1E00;
-  font-size: 0.9rem;
-}
-
-.detail-item .label {
-  color: #FFFFFF;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.8;
-}
-
-.detail-item .value {
-  color: #FFFFFF;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 0.8rem;
-  font-weight: 400;
-}
-
-.detail-item .value.lap-record {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.2;
-}
-
-.detail-item .value.lap-record .time {
-  font-size: 0.8rem;
-}
-
-.detail-item .value.lap-record .holder {
-  font-size: 0.65rem;
-  opacity: 0.8;
-  font-style: italic;
-}
-
-/* [Map Controls] */
-.button-container {
+/* ============================
+ * Help and About Boxes
+ * ============================
+*/
+.info-button-container {  /* Info button container formatting (holds help and about buttons) */
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 35px;
   display: flex;
   justify-content: space-between;
   width: 100%;
   padding: 0 8px;
-  margin-top: 8px;
   pointer-events: auto;
-  transition: margin-top 0.3s ease-in-out;
+  z-index: 2;
 }
 
-/* Medium screens (770px to 1120px) */
-@media (min-width: 770px) and (max-width: 1120px) {
-  .flag-row {
-    flex-direction: column;
-    height: auto;
-    padding: 0;
-    width: 100%;
-  }
-
-  .title-section {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 30, 0, 0.3);
-    margin-right: 0;
-    padding: 0.35rem 1rem;
-    text-align: center;
-    background: rgba(21, 21, 30, 0.95);
-  }
-
-  .title-section h1 {
-    font-size: 1.2rem;
-    margin: 0;
-  }
-
-  .title-section .byline {
-    font-size: 0.8rem;
-    margin: 0.1rem 0 0;
-  }
-
-  .flag-container {
-    width: 100%;
-    justify-content: space-between;
-    padding: 0.35rem 1rem;
-    background: rgba(21, 21, 30, 0.95);
-  }
+.help-box, .about-box {  /* Help and about buttons general formatting */
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-@media (max-width: 1120px) {
+
+.help-toggle, .about-toggle {  /* Help and about close button content */
+  background: rgba(21, 21, 30, 0.85);
+  color: white;
+  border: 1px solid #FF1E00;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.help-toggle:hover, .about-toggle:hover {  /* Hover effect */
+  background: #FF1E00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(21, 21, 30, 0.3);
+}
+
+.help-toggle:active, .about-toggle:active {  /* Click effect */
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
+}
+
+.help-toggle i, .about-toggle i {  /* Icon */
+  width: 16px;
+  height: 16px;
+  display: flex;
+}
+
+.help-content, .about-content {  /* Help and about content popup box (hidden by default) */
+  position: absolute;
+  bottom: 100%;
+  width: 325px;
+  background: rgba(21, 21, 30, 0.95);
+  border: 2px solid #FF1E00;
+  border-radius: 8px;
+  padding: 1rem 1rem 0.75rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: none;
+  font-family: "Titillium Web", sans-serif;
+}
+
+.help-content {  /* Help box positioning */
+  right: 0;
+}
+
+.about-content {  /* About box positioning */
+  left: 0;
+}
+
+.help-content.active, .about-content.active {  /* help and about content popup box visible */
+  display: block;
+}
+
+.help-content .help-toggle, .about-content .about-toggle {  /* Help and about popup box close button */
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+}
+
+.help-content .help-toggle:hover, .about-content .about-toggle:hover {  /* Hover effect */
+  background: rgba(255, 30, 0, 0.1);
+}
+
+.help-content h2, .about-content h2 {  /* Help and about content title */
+  color: #FF1E00;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 30, 0, 0.3);
+  padding-bottom: 0.5rem;
+}
+
+.help-content ul, .about-content ul {  /* Help and about content box list */
+  list-style: none;
+  padding: 0;
+  margin: 0 0;
+}
+
+.help-content li, .about-content li {  /* Help and about content list items */
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-content li i, .about-content li i {  /* Icons */
+  color: #FF1E00;
+  width: 16px;
+  height: 16px;
+  display: flex;
+}
+
+.about-content p {  /* About content paragraph */
+  margin: 0 0 0.5rem;
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.about-content .attribution {  /* About content attribution section */
+  margin-top: 0.5rem;
+  border-top: 1px solid rgba(255, 30, 0, 0.3);
+  padding-top: 0.5rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.about-content .attribution p {  /* About content attribution paragraph */
+  margin: 0 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.about-content .attribution a {  /* About content attribution link */
+  color: #FF1E00;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.about-content .attribution a:hover {  /* About content attribution link hover effect */
+  color: #C80F00;
+}
+
+.about-content .attribution .disclaimer {  /* About content attribution disclaimer */
+  font-size: 0.65rem;
+  color: #666;
+  padding-top: 0.25rem;
+  line-height: 1;
+}
+
+/* ============================
+ * Map Controls
+ * ============================
+*/
+#nav-control-container {  /* Mapbox navigation controls container */
+  position: absolute;
+  top: 100%;
+  right: 8px;
+  margin-top: 8px;
+  z-index: 3;
+}
+
+/* ============================
+ * Media Queries
+ * ============================
+*/
+/* Base styling for medium screens (up to 1120px) */
+@media (max-width: 1120px) { 
   .circuit-details {
     width: calc(100% - 180px);
     gap: 0.75rem;
@@ -600,6 +756,43 @@ html, body {
   }
 }
 
+/* Medium screens (770px to 1120px) */
+@media (min-width: 770px) and (max-width: 1120px) {
+  .flag-row {
+    flex-direction: column;
+    height: auto;
+    padding: 0;
+    width: 100%;
+  }
+
+  .title-section {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 30, 0, 0.3);
+    margin-right: 0;
+    padding: 0.35rem 1rem;
+    text-align: center;
+    background: rgba(21, 21, 30, 0.95);
+  }
+
+  .title-section h1 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+
+  .title-section .byline {
+    font-size: 0.8rem;
+    margin: 0.1rem 0 0;
+  }
+
+  .flag-container {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.35rem 1rem;
+    background: rgba(21, 21, 30, 0.95);
+  }
+}
+
 /* Small screens (below 770px) */
 @media (max-width: 770px) {
   .flag-row {
@@ -629,255 +822,12 @@ html, body {
   }
 }
 
-/* [Help Section] */
-.help-section {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 3;
-}
-
-.help-content {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  width: 300px;
-  background: rgba(21, 21, 30, 0.95);
-  border: 2px solid #FF1E00;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  display: none;
-}
-
-.help-content.active {
-  display: block;
-}
-
-.help-content h2 {
-  color: #FF1E00;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.help-content ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.help-content li {
-  color: #FFFFFF;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 0.875rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.help-content li:last-child {
-  margin-bottom: 0;
-}
-
-.help-content li i {
-  color: #FF1E00;
-  font-size: 1rem;
-}
-
-.help-toggle {
-  background: rgba(21, 21, 30, 0.85);
-  color: white;
-  border: 1px solid #FF1E00;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-family: "Titillium Web", sans-serif;
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease-in-out;
-}
-
-.help-toggle:hover {
-  background: #FF1E00;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(21, 21, 30, 0.3);
-}
-
-.help-toggle:active {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
-}
-
-.help-content .help-toggle {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  padding: 0.25rem;
-  background: none;
-  border: none;
-}
-
-.help-content .help-toggle:hover {
-  background: rgba(255, 30, 0, 0.1);
-}
-
-/* [About Section] */
-.about-section {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  z-index: 3;
-}
-
-.about-content {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  width: 350px;
-  background: rgba(21, 21, 30, 0.95);
-  border: 2px solid #FF1E00;
-  border-radius: 8px;
-  padding: 1rem 1rem 0.75rem 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  display: none;
-}
-
-.about-content.active {
-  display: block;
-}
-
-.about-content h2 {
-  color: #FF1E00;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid rgba(255, 30, 0, 0.3);
-  padding-bottom: 0.5rem;
-}
-
-.about-body {
-  color: #FFFFFF;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.about-body p {
-  margin: 0 0 1rem;
-}
-
-.about-body ul {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 0.5rem;
-}
-
-.about-body li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.about-body li i {
-  color: #FF1E00;
-  font-size: 1rem;
-}
-
-.attribution {
-  border-top: 1px solid rgba(255, 30, 0, 0.3);
-  padding-top: 0.5rem;
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-
-.attribution p {
-  margin: 0 0 0.25rem;
-}
-
-.attribution a {
-  color: #FF1E00;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.attribution a:hover {
-  color: #C80F00;
-}
-
-.about-toggle {
-  background: rgba(21, 21, 30, 0.85);
-  color: white;
-  border: 1px solid #FF1E00;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-family: "Titillium Web", sans-serif;
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease-in-out;
-}
-
-.about-toggle:hover {
-  background: #FF1E00;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(21, 21, 30, 0.3);
-}
-
-.about-toggle:active {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
-}
-
-.about-content .about-toggle {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  padding: 0.25rem;
-  background: none;
-  border: none;
-}
-
-.about-content .about-toggle:hover {
-  background: rgba(255, 30, 0, 0.1);
-}
-
-/* [Map Controls] */
-.mapboxgl-ctrl-top-right {
-  top: 56px !important;
-  transition: top 0.3s ease-in-out;
-}
-
-.circuit-info.active ~ .mapboxgl-ctrl-top-right {
-  top: 120px !important;
-}
-
-#nav-control-container {
-  position: absolute;
-  top: 100%;
-  right: 8px;
-  margin-top: 8px;
-  z-index: 3;
-  pointer-events: auto;
-}
-
-#nav-control-container .mapboxgl-ctrl-group {
-  margin: 0;
-  box-shadow: 0 2px 4px rgba(21, 21, 30, 0.2);
+/* ============================
+ * Icons
+ * ============================
+*/
+/* Font Awesome and Bootstrap Icons need to be set to 16px for consistency */
+.fa-solid::before, .bi::before {
+  width: 16px;
+  height: 16px;
 }

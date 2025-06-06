@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <!-- Meta -->
   <meta charset="UTF-8">
-  <title>F1 Circuits Map</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>F1 Circuits Map</title>
+  <!-- External CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet">
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <script src="https://kit.fontawesome.com/4cf2692e6b.js" crossorigin="anonymous"></script>
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css">
-  <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet">
+  <!-- Scripts -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js"></script>
 </head>
 <body>
+  <!-- Main Controls Section -->
   <div class="top-controls">
+    <!-- Title and Flags -->
     <div class="flag-row">
       <div class="title-section">
         <h1>Formula 1&trade; 2025</h1>
         <p class="byline">by Michal Klopotowski</p>
       </div>
+      <!-- Flags -->
       <div class="flag-container">
         <img src="https://flagcdn.com/au.svg" class="flag" onclick="showTrack('Melbourne')" title="Melbourne" alt="Melbourne">
         <img src="https://flagcdn.com/cn.svg" class="flag" onclick="showTrack('Shanghai')" title="Shanghai" alt="Shanghai">
@@ -48,6 +57,7 @@
         <img src="https://flagcdn.com/ae.svg" class="flag" onclick="showTrack('Yas Marina')" title="Yas Marina" alt="Yas Marina">
       </div>
     </div>
+    <!-- Detailed Circuit Info -->
     <div class="circuit-info">
       <div class="circuit-info-content">
         <h2 class="circuit-name"></h2>
@@ -58,7 +68,7 @@
             <span class="value first-gp"></span>
           </div>
           <div class="detail-item">
-            <i class="bi bi-arrow-repeat"></i>
+            <i class="fa-solid fa-flag-checkered"></i>
             <span class="label">Laps:</span>
             <span class="value laps"></span>
           </div>
@@ -68,7 +78,7 @@
             <span class="value length"></span>
           </div>
           <div class="detail-item">
-            <i class="bi bi-arrow-up"></i>
+            <i class="fa-solid fa-mountain"></i>
             <span class="label">Altitude:</span>
             <span class="value altitude"></span>
           </div>
@@ -83,6 +93,7 @@
         </div>
       </div>
     </div>
+    <!-- Control Buttons -->
     <div class="button-container">
       <button type="button" id="spin-control" class="btn btn-secondary">
         <i class="bi bi-pause-fill"></i> Stop Rotation
@@ -93,50 +104,53 @@
     </div>
     <div id="nav-control-container"></div>
   </div>
-  <div id="map"></div>
-  <div class="help-section">
-    <div class="help-content">
-      <h2>How to Use This Map</h2>
-      <ul>
-        <li><i class="bi bi-globe"></i> The globe automatically rotates - click "Stop Rotation" in the top-left corner to pause/resume</li>
-        <li><i class="bi bi-flag"></i> On desktop: Hover over flags in the top bar to see circuit details</li>
-        <li><i class="bi bi-geo-alt"></i> Click any flag marker on the map to see detailed circuit information in a popup</li>
-        <li><i class="bi bi-arrow-right"></i> Zoom in close to a circuit to see its track layout and racing direction</li>
-        <li><i class="bi bi-zoom-in"></i> Click "Reset Zoom" in the top-right corner to return to the global view</li>
-      </ul>
-      <button class="help-toggle"><i class="bi bi-x-lg"></i></button>
-    </div>
-    <button class="help-toggle"><i class="bi bi-question-circle"></i> Help</button>
-  </div>
-
-  <div class="about-section">
-    <div class="about-content">
-      <h2>About This Map</h2>
-      <div class="about-body">
-        <p>Welcome to the Formula 1&trade; 2025 World Championship Circuit Map. This interactive visualization showcases all 24 circuits that will host Grand Prix races in the 2025 season, from the season opener in Melbourne to the championship finale in Abu Dhabi.</p>
-        <p>Each circuit is represented by its national flag, and detailed information is available including:</p>
-        <ul>
-          <li><i class="bi bi-trophy"></i> First Grand Prix held at the circuit</li>
-          <li><i class="bi bi-arrow-repeat"></i> Number of laps in the race</li>
-          <li><i class="bi bi-rulers"></i> Circuit length</li>
-          <li><i class="bi bi-arrow-up"></i> Circuit altitude</li>
-          <li><i class="bi bi-stopwatch"></i> Current lap record</li>
-        </ul>
-        <div class="attribution">
-          <p>Created by Michal Klopotowski</p>
-          <p>Data sources: Formula 1&trade;, FIA</p>
-          <p>Flags provided by <a href="https://flagcdn.com" target="_blank">flagcdn.com</a></p>
-        </div>
+  <!-- Information and Help -->
+  <div class="info-button-container">
+    <!-- Map Info Box -->
+    <div class="about-box">
+      <div class="about-content">
+        <h2>About This Map</h2>
+          <p>Welcome to the Formula 1&trade; 2025 World Championship Circuit Map. This interactive visualization showcases all 24 circuits that will host Grand Prix races in the 2025 season, from the season opener in Melbourne to the championship finale in Abu Dhabi.</p>
+          <p>Each circuit is represented by its national flag, and detailed information is available including:</p>
+          <ul>
+            <li><i class="bi bi-trophy"></i> First Grand Prix held at the circuit</li>
+            <li><i class="fa-solid fa-flag-checkered"></i> Number of laps in the race</li>
+            <li><i class="bi bi-rulers"></i> Circuit length</li>
+            <li><i class="fa-solid fa-mountain"></i> Circuit altitude</li>
+            <li><i class="bi bi-stopwatch"></i> Current lap record</li>
+          </ul>
+          <div class="attribution">
+            <p>Data sources: Formula 1&trade;, <a href="https://github.com/bacinger/f1-circuits" target="_blank">Formula 1&trade; circuits repository</a></p>
+            <p>Flags provided by <a href="https://flagcdn.com" target="_blank">flagcdn.com</a></p>
+            <p class="disclaimer">This site is unofficial and is not associated in any way with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX, and related marks are trademarks of Formula One Licensing B.V.</p>
+            <p class="disclaimer">Formula 1&trade; circuits data are not official, and they are not approved nor endorsed by Formula One Licensing B.V.</p>
+          </div>
+        <button class="about-toggle"><i class="bi bi-x-lg"></i></button>
       </div>
-      <button class="about-toggle"><i class="bi bi-x-lg"></i></button>
+      <button class="about-toggle"><i class="bi bi-info-circle"></i> About</button>
     </div>
-    <button class="about-toggle"><i class="bi bi-info-circle"></i> About</button>
+    <!-- Map Help Box -->
+    <div class="help-box">
+      <div class="help-content">
+        <h2>How to Use This Map</h2>
+        <ul>
+          <li><i class="bi bi-globe"></i> The globe automatically rotates - click "Stop Rotation" in the top-left corner to pause/resume</li>
+          <li><i class="fa-solid fa-flag-usa"></i> On desktop: Hover over flags in the top bar to see circuit details</li>
+          <li><i class="fa-solid fa-location-dot"></i> Click any flag marker on the map to see detailed circuit information in a popup</li>
+          <li><i class="fa-solid fa-magnifying-glass-location"></i> Zoom in close to a circuit to see its track layout and racing direction</li>
+          <li><i class="bi bi-zoom-in"></i> Click "Reset Zoom" in the top-right corner to return to the global view</li>
+        </ul>
+        <button class="help-toggle"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <button class="help-toggle"><i class="bi bi-question-circle"></i> Help</button>
+    </div>
   </div>
-
+  <!-- Map -->
+  <div id="map"></div>
+  <!-- Scripts -->
   <script src="script.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
-
 </html>
