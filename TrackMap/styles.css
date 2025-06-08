@@ -417,6 +417,29 @@ html, body {
   font-style: italic;
 }
 
+/* Footer disclosure statement */
+#footer {
+  text-align: left;
+  background-color: #ffffff80;
+  margin: 0;
+  padding: 0 5px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 2;
+  color: #000000bf;
+  font-size: 10px;
+  font-family: Helvetica Neue,Arial,Helvetica,sans-serif;
+  max-width: 75%;
+  max-height: 30px;
+}
+
+/* Move Mapbox attribution up */
+.mapboxgl-ctrl-bottom-right {
+  transform: translateY(-75%);
+  margin-bottom: 0;
+}
+
 /* ============================
  * Interaction Components
  * ============================
@@ -508,7 +531,7 @@ html, body {
 .info-button-container {  /* Info button container formatting (holds help and about buttons) */
   position: absolute;
   bottom: 0;
-  margin-bottom: 35px;
+  margin-bottom: 45px;
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -819,6 +842,21 @@ html, body {
 
   .title-section .byline {
     font-size: 0.8rem;
+  }
+}
+
+/* Small screen footer attribution */
+@media (max-width: 640px) {
+  .mapboxgl-ctrl-bottom-right {
+    transform: translateY(-25px);
+  }
+
+  .info-button-container {
+    margin-bottom: 65px;
+  }
+
+  #footer {
+    min-height: 30px;
   }
 }
 
